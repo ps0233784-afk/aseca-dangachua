@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-primary: #1a56db;
+  --brand-secondary: #147d4b;
+  --brand-accent: #d9a033;
+  --brand-deep: #0c4a2e;
+  --brand-radius: 18px;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Poppins', 'Inter', 'Noto Sans', system-ui, -apple-system, sans-serif;
+  @apply antialiased bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100;
+}
+
+.font-odia { font-family: 'Noto Sans Oriya', 'Poppins', sans-serif; }
+.font-deva { font-family: 'Noto Sans Devanagari', 'Poppins', sans-serif; }
+.font-olchiki { font-family: 'Noto Sans Ol Chiki', 'Poppins', sans-serif; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.35); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.6); }
+
+/* Utility classes */
+@layer components {
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl dark:bg-slate-900/70 border border-white/40 dark:border-white/10;
+  }
+  .card {
+    @apply rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-soft;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-glow;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-medium rounded-xl px-4 py-2.5 text-sm transition-all duration-200
+      disabled:opacity-50 disabled:cursor-not-allowed select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+  }
+  .btn-primary {
+    @apply btn text-white shadow-md hover:shadow-lg hover:brightness-110 active:scale-[0.98];
+    background: linear-gradient(120deg, var(--brand-primary), var(--brand-secondary));
+  }
+  .btn-gold { @apply btn text-white shadow-md hover:brightness-110; background: linear-gradient(120deg, #d9a033, #b97f14); }
+  .btn-outline {
+    @apply btn border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800;
+  }
+  .btn-ghost {
+    @apply btn text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800;
+  }
+  .btn-danger { @apply btn text-white bg-rose-600 hover:bg-rose-700 shadow-sm; }
+  .input {
+    @apply w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm
+      text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400 transition;
+  }
+  .label { @apply block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1.5; }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold;
+  }
+  .th { @apply px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap; }
+  .td { @apply px-4 py-3 text-sm whitespace-nowrap; }
+  .section-title { @apply text-3xl sm:text-4xl font-bold tracking-tight; }
+  .kicker {
+    @apply inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em];
+    color: var(--brand-secondary);
+  }
+}
+
+/* Pattern overlay for cultural motifs */
+.pattern-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.10' stroke-width='1'%3E%3Cpath d='M24 4 L44 40 L4 40 Z'/%3E%3Cpath d='M24 14 L36 40 L12 40 Z'/%3E%3Ccircle cx='24' cy='30' r='2'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 48px 48px;
+}
+
+.hero-gradient {
+  background: linear-gradient(155deg, #0c4a2e 0%, #0e5a36 30%, #1458c0 100%);
+}
+
+/* Recharts dark-mode tweaks */
+.recharts-default-tooltip { border-radius: 12px !important; }
+
+/* Smooth entrance */
+.animate-fade-up { animation: fadeUp 0.7s ease-out both; }
+.animate-fade-in { animation: fadeIn 0.5s ease-out both; }
+@keyframes fadeUp { 0% { opacity: 0; transform: translateY(24px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+
+/* Print */
+@media print {
+  .no-print { display: none !important; }
+}
