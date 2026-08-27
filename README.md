@@ -1,151 +1,122 @@
-# BRANCH ASECA DANGACHUA
-### Multi-School ERP + Public Website — Education • Culture • Community
+# BRANCH ASECA DANGACHUA — Multi-School ERP + CMS + Public Website
 
-A complete, production-ready **multi-school management platform** with a beautiful
-Santali-heritage-inspired **public landing website** and a **secure ERP/admin portal**,
-both driven by the same database.
+**ADIVASI SOCIO-EDUCATIONAL & CULTURAL ASSOCIATION, ODISHA (ASECA)**
+ᱚ.ᱟ.ᱮ.ᱥ.ᱮ.ᱠ.ᱮ ᱩᱰᱤᱥᱟ ᱥᱟᱠᱷᱟ ᱫᱟᱸᱜᱩᱣᱟᱹ ᱠᱮᱱᱫᱩᱡᱷᱟᱹᱨ, ᱩᱰᱤᱥᱟ
+*Education • Culture • Community*
 
----
+- **H.O.:** Regd No-2667/269 of 1964, Rairangpur
+- **B.O.:** Regd No-77/26 of 2026, At-Dangachua, P.O.-Bidyadharpur, P.S.-Soso, Dist-Kendujhar, PIN-758078, Odisha
 
-## 1. What is included
+A complete, database-driven ERP for the Ol-Itun Ashra (Santali-medium school) network:
+multi-school management, students with Aadhaar identity verification, 11-member SMC
+management, Matric & +2 mark sheets with MIL Santali Papers I–IV, printable affiliation
+forms, certificates, ID cards, attendance, hostel, library, notices, events, a visual
+CMS page builder, Excel import/export, and a public marketing website — with **no
+payment/fee functionality anywhere** (by design).
 
-### Public Website (`/`)
-- Cinematic hero with editable floating statistics, brand badge and CTA buttons
-- About (mission / vision / values), Managing Body (11 editable members)
-- Searchable school directory, Santali Culture section (7 editable topics)
-- Animated statistics counters, latest Notices & Events, Achievements, Gallery (albums + lightbox)
-- **Result Search** (by Roll No / Student ID / Admission No) with subject-wise marks,
-  total, percentage, grade, pass/fail status and **QR result verification**
-- Final CTA and a rich footer (org info, quick links, schools, services, contact, social, legal)
-- Light/Dark mode + language selector: **English · Odia · Hindi · Santali · Ol Chiki**
+## Tech stack
 
-### Secure ERP Portal (`/login` → `/app`)
-- Role-based access with **10 roles** (Super Admin, Org Admin, School Admin, Principal,
-  Teacher, Accountant, Librarian, Staff, Student, Parent)
-- **Super Admin dashboard** (schools, students, staff, attendance, fees, exams, results + charts)
-- School dashboard (auto-scoped) and a dedicated **Student/Parent portal**
-- **Schools** (CRUD, archive/restore, statistics, school switcher), **Academic years**
-- **Students** (full CRUD, search/filter, transfer/promote/archive, **Excel import/export**
-  with validation, documents, 9-tab profile, ID card)
-- **Teachers & Staff** (profiles, subject allocation, staff types)
-- **Academics** (classes, sections, subjects, class↔subject mapping)
-- **Attendance** (daily, bulk, 5 statuses, class/date filters, mobile-friendly tap UI)
-- **Exams & Results** (unlimited exams, subject config, bulk marks entry, auto
-  total/percentage/grade/rank, publish & lock, configurable grading rules)
-- **Report Cards** (preview / print / PDF), **Timetable**, **Fees** (structures, dues,
-  payments, receipts), **Hostel** (rooms, beds, allocation), **Library** (books, issue/return, fines)
-- **Notices** (draft/publish/schedule/expire) & **Events** → auto-published on the website
-- **Documents**, **Certificates** (bonafide/transfer/character/study/participation PDFs),
-  **ID Cards** (photo + QR, bulk print)
-- **Reports & analytics** (charts + Excel export), **Global search**, **Notification center**
-- **Users, Roles & Permissions** (editable permission matrix), **Audit logs**, **Settings**
-  (organisation, branding/colours/logo, grading rules, languages, notifications)
+| Layer | Technology |
+|---|---|
+| Frontend | React 18 + TypeScript, Vite, Tailwind CSS, Lucide icons, Recharts |
+| Backend | Node.js + Express + TypeScript |
+| Database | SQLite (zero-config, auto-seeding) — PostgreSQL DDL provided (`server/postgres-schema.sql`) |
+| Auth | JWT sessions, bcrypt password hashing, role-based access (6 roles) |
+| Storage | Local secure object store (`/uploads`) — swap for Supabase Storage / S3 |
+| Documents | Browser print engine → PDF (affiliation form, mark sheet, certificates, ID cards) |
+| Excel | SheetJS (xlsx) bulk import & export |
 
-### Public ↔ ERP connection
-The landing page reads live data. When an administrator edits organisation info,
-school details, managing body, notices, events, gallery, achievements or Santali-culture
-content inside the ERP, the public website updates **immediately** — one system, two faces.
-
----
-
-## 2. Tech stack
-
-| Layer     | Technology |
-|-----------|------------|
-| Frontend  | React 18 + TypeScript + Vite + Tailwind CSS + Recharts + lucide-react |
-| Backend   | Node.js + Express (modular routes) |
-| Database  | SQLite via better-sqlite3 (WAL mode, indexed, FK-enforced) |
-| Auth      | JWT (session-tracked) + bcrypt password hashing |
-| PDFs      | PDFKit (report cards, certificates) |
-| QR codes  | `qrcode` (ID cards, result verification) |
-| Import/Export | SheetJS (xlsx) |
-
-The whole app is served as a single deployable unit: Express serves the built SPA and
-`/api/*` from the same origin (no CORS complexity, works behind one proxy).
-
----
-
-## 3. Running the project
+## Quick start (local)
 
 ```bash
-cd erp
-npm install
-npm run seed      # (optional) recreate the demo database
-npm run serve     # builds the frontend and starts the server
+npm run install:all      # install server + client deps
+npm run build            # build both (or run dev servers below)
+npm start                # serves API + built site on http://localhost:4000
 ```
 
-- Public website: `http://localhost:8080/`
-- ERP login:     `http://localhost:8080/login`
-- Development mode: `npm run dev` (Vite on :5173 proxies `/api` to :8080)
+Dev mode (hot reload):
 
-### Demo credentials (password for all: `Admin@123`)
-
-| Username     | Role             | Scope |
-|--------------|------------------|-------|
-| `superadmin` | Super Admin      | All schools |
-| `orgadmin`   | Organisation Admin | All schools |
-| `schooladmin`| School Admin     | High School (SCH-001) |
-| `principal`  | Principal        | High School |
-| `sumitra` / `chaitanya` / `phula` | Teacher | School 1/1/2 |
-| `accountant` | Accountant       | School 1 |
-| `librarian`  | Librarian        | School 1 |
-| `staff`      | Staff            | School 1 |
-| `birsa`      | Student          | STU-1001 |
-| `parent`     | Parent/Guardian  | 2 children |
-
----
-
-## 4. Architecture
-
-```
-erp/
-├── server/                 # Express + SQLite backend
-│   ├── index.js            # app entry, static serving, uploads, QR, route mounting
-│   ├── schema.sql          # full relational schema (40+ tables, indexes, FKs)
-│   ├── seed.js             # realistic fictional demo data (safe to re-run)
-│   ├── db.js               # better-sqlite3 connection + helpers
-│   ├── auth.js             # JWT, bcrypt, sessions, role permission presets
-│   ├── middleware.js       # requireAuth, requirePermission, school scoping, audit
-│   ├── reportcard.js       # PDFKit report card + certificate builders
-│   └── routes/             # auth, schools, academics, students, staff, attendance,
-│                           # exams, fees, library, hostel, timetable, content, admin, public
-├── src/
-│   ├── lib/                # api client, i18n (en/od/hi/sat/olc), formatting, hooks
-│   ├── contexts/           # Auth, Theme, Brand (live org/branding/stats)
-│   ├── components/         # ui primitives, charts, public + app layouts
-│   └── pages/
-│       ├── public/         # Home, Schools, About, ManagingBody, Culture, Notices,
-│       │                   # Events, Gallery, Results, Contact
-│       ├── auth/           # Login, Forgot/Reset password
-│       └── app/            # ~30 ERP modules
-└── data/                   # SQLite DB + uploaded media (persisted)
+```bash
+npm run dev:server       # Express on :4000 (tsx watch)
+npm run dev:client       # Vite on :5173 (proxies /api → :4000)
 ```
 
-**Core data model:** Organization → Schools → Academic Years → Classes → Sections →
-Subjects → Students (→ Guardians) → Enrollments → Attendance → Exams → Marks → Results
-→ Report Cards → Fees → Payments → Hostel → Library → Notices → Events → Documents →
-Certificates → Timetable → Notifications → Gallery → Audit Logs → Settings.
+### Demo accounts
 
----
+| Role | Email | Password |
+|---|---|---|
+| Central Administrator | `admin@aseca.org` | `admin@123` |
+| Branch Administrator | `branch@aseca.org` | `branch@123` |
+| Headmaster (Principal) | `bhagaban@aseca.org` | `school@123` |
+| Teacher | `teacher@aseca.org` | `school@123` |
 
-## 5. Security & privacy
+The database seeds itself on first boot: 3 affiliated Ol-Itun Ashras (Hans Hansli
+Dangachua, Sida Kanhu Haradabadi, Marang Buru Binapatia), full 11-member SMC for each,
+23 students (incl. the Matric examinees Urmila Hembram, Benudhar Murmu, Suru Beshra,
+Anant Kisku and 12 +2 examinees), SUMMER-2026-27 exams at Ragudia centre (code 026),
+hostels, library books, notices, events and the public home page.
 
-- Passwords hashed with **bcrypt** (never stored in plain text)
-- JWT sessions persisted & revocable (logout, "sign out other devices")
-- Server-side **permission checks** on every protected route
-- **School-level data isolation** (non-org roles only see their school's data)
-- Aadhaar/sensitive fields never returned on public endpoints
-- File upload allow-list + 10 MB limit; protected documents flagged sensitive
-- **Audit log** for logins, student changes, marks, results, fees, notices, users, permissions
-- Input validation & SQL parameterisation throughout
+## Modules
 
----
+- **Dashboard** — branch KPIs, attendance trend, gender split, school-wise charts, latest notices
+- **Schools & SMC** — affiliation data, 11-member statutory committee editor with signature tracking
+- **Students** — admission, Odia/Santali (Ol Chiki) names, Aadhaar validation + masked display,
+  9-tab profile (Overview, Identity & Verification, Academic, Attendance, Examinations,
+  Documents, Library, Timetable, Certificates)
+- **Teachers & Staff** — designations, qualifications, subject specialisations, support staff
+- **Attendance** — daily student & teacher registers, term summary, audit-logged
+- **Exams & Mark Sheets** — Matric/+2 grid: MIL-I–IV (Santali), Odia, English; auto totals,
+  grades (A+…F), PASS/FAIL (30/paper, 33% aggregate); roll formats `36SSMS026001`, `36SS+2S026001`
+- **Subjects** — dynamic, editable Ol-Itun Ashra subject catalogue (global + per-school)
+- **Timetable** — weekly period grid per class
+- **Hostel** — boys/girls hostels, wardens, capacity, room/bed allocation
+- **Library** — catalogue, copies, PDF book upload, 30-day issue/return register
+- **Notices / Events / Media** — branch-wide or per-school, public-site integration
+- **Page Builder** — block-based visual CMS for the public landing page
+- **Certificates & ID Cards** — bonafide, conduct, transfer certificates; front/back ID cards
+- **Excel Center** — export/import .xlsx for students, teachers, staff, SMC, books, notices, exams
+- **Users & Roles / Audit Logs** — multi-role authorization and full activity trail
+- **Public website** — home, about, schools, notices, events, contact (Ol Chiki typography,
+  tribal motifs, glassmorphism, brand palette)
 
-## 6. Demo data
+### Explicitly excluded
+No fees, payments, transactions, receipts, gateways, revenue dashboards or financial reports —
+anywhere in the schema, API, UI or menus.
 
-3 schools · 48 students · 10 staff · 11 managing-body members · 3 exams with computed
-results & ranks · fee structures/payments · 2 hostels with rooms & allocations · 8 books
-with transactions · notices, events, achievements, gallery albums and cultural content.
-Everything is editable/deletable from the ERP.
+## Deploy to Render
 
-*All names, people and data are fictional examples for demonstration.*
+The included `render.yaml` blueprint defines a single Web Service:
+
+1. Push this repo to GitHub/GitLab.
+2. Render → **New → Blueprint** → select the repo → apply `render.yaml`.
+   (Or create a Web Service manually: build `npm run install:all && npm run build`,
+   start `node server/dist/index.js`, health check `/api/health`.)
+3. Set env vars: `JWT_SECRET` (auto-generated by blueprint), `NODE_ENV=production`,
+   `SEED_ON_BOOT=true`. Render injects `PORT`.
+4. The service serves both the REST API and the built React app from one origin.
+
+**Persistence:** the free plan has an ephemeral disk — the database auto-reseeds on every
+deploy (fine for demos). For persistent data, attach a Render Disk mounted at `/var/data`
+(uncomment the `disk:` block in `render.yaml`), or provision Render Postgres and use
+`server/postgres-schema.sql`. Uploads (`/uploads`) likewise persist only with a disk;
+for production use Supabase Storage / S3 (the upload route is isolated in
+`server/src/routes/ops.ts` for easy swapping).
+
+## Project layout
+
+```
+aseca/
+├── render.yaml              # Render blueprint
+├── server/
+│   ├── src/
+│   │   ├── index.ts         # Express app, static hosting
+│   │   ├── db.ts            # SQLite schema + idempotent seed
+│   │   ├── auth.ts          # JWT, role middleware, audit
+│   │   └── routes/          # core, people, academic, ops APIs
+│   └── postgres-schema.sql  # PostgreSQL + RLS reference DDL
+└── client/
+    └── src/
+        ├── App.tsx          # routes (public / app / print)
+        ├── pages/           # public site + ERP modules + printables
+        └── components/      # UI kit
+```
