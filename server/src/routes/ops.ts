@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -13,14 +13,14 @@ const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, '..', '..', '.
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 const storage = multer.diskStorage({
   destination: UPLOAD_DIR,
-  filename: (_req, file, cb) => {
+  filename: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
     const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
     cb(null, Date.now() + '-' + safe);
   },
 });
 const upload = multer({ storage, limits: { fileSize: 15 * 1024 * 1024 } });
 
-r.post('/upload', requireAuth, upload.single('file'), (req: AuthedRequest, res) => {
+r.post('/upload', requireAuth, upload.single('file'), (req: AuthedRequest, res: Response) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   const url = '/uploads/' + req.file.filename;
   if (req.body.type === 'media') {
@@ -32,12 +32,12 @@ r.post('/upload', requireAuth, upload.single('file'), (req: AuthedRequest, res) 
 });
 
 /* ================= HOSTEL ================= */
-r.get('/hostels', (req, res) => {
+r.get('/hostels', (req: AuthedRequest, res: Response) => {
   const hostels: any[] = db.prepare('SELECT * FROM hostels WHERE school_id=?').all(req.query.school_id);
   hostels.forEach((h) => { h.allocations = db.prepare('SELECT * FROM hostel_allocations WHERE hostel_id=?').all(h.id); });
   res.json(hostels);
 });
-r.post('/hostels', requireWrite, (req: AuthedRequest, res) => {
+r.post('/hostels', requireWrite, (req: AuthedRequest, res: Response) => {
   const b = req.body;
   if (b.id) {
     db.prepare('UPDATE hostels SET name=?,type=?,warden=?,capacity=? WHERE id=?')
@@ -50,7 +50,7 @@ r.post('/hostels', requireWrite, (req: AuthedRequest, res) => {
   }
   res.json({ ok: true });
 });
-r.post('/hostels/allocate', requireWrite, (req: AuthedRequest, res) => {
+r.post('/hostels/allocate', requireWrite, (req: AuthedRequest, res: Response) => {
   const b = req.body;
   const stu: any = db.prepare('SELECT name FROM students WHERE id=?').get(b.student_id);
   db.prepare('INSERT INTO hostel_allocations (hostel_id,room_no,student_id,student_name,bed,check_in,status) VALUES (?,?,?,?,?,?,?)')
@@ -59,7 +59,7 @@ r.post('/hostels/allocate', requireWrite, (req: AuthedRequest, res) => {
   logAction(req, 'ALLOCATE', 'hostels', `Student ${b.student_id} -> hostel ${b.hostel_id}`);
   res.json({ ok: true });
 });
-r.post('/hostels/vacate/:id', requireWrite, (req: AuthedRequest, res) => {
+r.post('/hostels/vacate/:id', requireWrite, (req: AuthedRequest, res: Response) => {
   const alloc: any = db.prepare('SELECT * FROM hostel_allocations WHERE id=?').get(req.params.id);
   if (alloc) {
     db.prepare("UPDATE hostel_allocations SET status='vacated' WHERE id=?").run(req.params.id);
@@ -69,14 +69,14 @@ r.post('/hostels/vacate/:id', requireWrite, (req: AuthedRequest, res) => {
 });
 
 /* ================= LIBRARY ================= */
-r.get('/books', (req, res) => {
+r.get('/books', (req: AuthedRequest, res: Response) => {
   let sql = 'SELECT * FROM books WHERE 1=1';
   const args: any[] = [];
   if (req.query.school_id) { sql += ' AND school_id=?'; args.push(req.query.school_id); }
   const books: any[] = db.prepare(sql + ' ORDER BY id DESC').all(...args);
   res.json(books);
 });
-r.post('/books', requireWrite, (req: AuthedRequest, res) => {
+r.post('/books', requireWrite, (req: AuthedRequest, res: Response) => {
   const b = req.body;
   if (b.id) {
     db.prepare('UPDATE books SET title=?,author=?,isbn=?,category=?,copies=?,available=?,pdf_file=? WHERE id=?')
@@ -88,14 +88,14 @@ r.post('/books', requireWrite, (req: AuthedRequest, res) => {
   }
   res.json({ ok: true });
 });
-r.delete('/books/:id', requireWrite, (req: AuthedRequest, res) => {
+r.delete('/books/:id', requireWrite, (req: AuthedRequest, res: Response) => {
   db.prepare('DELETE FROM books WHERE id=?').run(req.params.id);
   res.json({ ok: true });
 });
-r.get('/book-issues', (_req, res) => {
+r.get('/book-issues', (_req: AuthedRequest, res: Response) => {
   res.json(db.prepare(`SELECT bi.*, b.title, b.author FROM book_issues bi JOIN books b ON b.id=bi.book_id ORDER BY bi.id DESC`).all());
 });
-r.post('/book-issues', requireWrite, (req: AuthedRequest, res) => {
+r.post('/book-issues', requireWrite, (req: AuthedRequest, res: Response) => {
   const b = req.body;
   const due = new Date(); due.setDate(due.getDate() + 30);
   db.prepare(`INSERT INTO book_issues (book_id,member_type,member_id,member_name,issue_date,due_date,status) VALUES (?,?,?,?,?,?, 'issued')`)
@@ -104,7 +104,7 @@ r.post('/book-issues', requireWrite, (req: AuthedRequest, res) => {
   logAction(req, 'ISSUE', 'books', `Book ${b.book_id} -> ${b.member_name}`);
   res.json({ ok: true });
 });
-r.post('/book-issues/return/:id', requireWrite, (req: AuthedRequest, res) => {
+r.post('/book-issues/return/:id', requireWrite, (req: AuthedRequest, res: Response) => {
   const iss: any = db.prepare('SELECT * FROM book_issues WHERE id=?').get(req.params.id);
   db.prepare("UPDATE book_issues SET status='returned', return_date=? WHERE id=?")
     .run(new Date().toISOString().slice(0, 10), req.params.id);
@@ -113,13 +113,13 @@ r.post('/book-issues/return/:id', requireWrite, (req: AuthedRequest, res) => {
 });
 
 /* ================= NOTICES ================= */
-r.get('/notices', (req, res) => {
+r.get('/notices', (req: AuthedRequest, res: Response) => {
   let sql = 'SELECT * FROM notices WHERE 1=1';
   const args: any[] = [];
   if (req.query.school_id) { sql += ' AND (school_id=0 OR school_id=?)'; args.push(req.query.school_id); }
   res.json(db.prepare(sql + ' ORDER BY date DESC, id DESC').all(...args));
 });
-r.post('/notices', requireWrite, (req: AuthedRequest, res) => {
+r.post('/notices', requireWrite, (req: AuthedRequest, res: Response) => {
   const b = req.body;
   if (b.id) {
     db.prepare('UPDATE notices SET school_id=?,title=?,body=?,category=?,priority=?,date=?,audience=? WHERE id=?')
@@ -131,19 +131,19 @@ r.post('/notices', requireWrite, (req: AuthedRequest, res) => {
   }
   res.json({ ok: true });
 });
-r.delete('/notices/:id', requireWrite, (req: AuthedRequest, res) => {
+r.delete('/notices/:id', requireWrite, (req: AuthedRequest, res: Response) => {
   db.prepare('DELETE FROM notices WHERE id=?').run(req.params.id);
   res.json({ ok: true });
 });
 
 /* ================= EVENTS ================= */
-r.get('/events', (req, res) => {
+r.get('/events', (req: AuthedRequest, res: Response) => {
   let sql = 'SELECT * FROM events WHERE 1=1';
   const args: any[] = [];
   if (req.query.school_id) { sql += ' AND (school_id=0 OR school_id=?)'; args.push(req.query.school_id); }
   res.json(db.prepare(sql + ' ORDER BY date').all(...args));
 });
-r.post('/events', requireWrite, (req: AuthedRequest, res) => {
+r.post('/events', requireWrite, (req: AuthedRequest, res: Response) => {
   const b = req.body;
   if (b.id) {
     db.prepare('UPDATE events SET school_id=?,title=?,description=?,date=?,venue=?,category=? WHERE id=?')
@@ -155,16 +155,16 @@ r.post('/events', requireWrite, (req: AuthedRequest, res) => {
   }
   res.json({ ok: true });
 });
-r.delete('/events/:id', requireWrite, (req: AuthedRequest, res) => {
+r.delete('/events/:id', requireWrite, (req: AuthedRequest, res: Response) => {
   db.prepare('DELETE FROM events WHERE id=?').run(req.params.id);
   res.json({ ok: true });
 });
 
 /* ================= MEDIA LIBRARY ================= */
-r.get('/media', (_req, res) => {
+r.get('/media', (_req: AuthedRequest, res: Response) => {
   res.json(db.prepare('SELECT * FROM media ORDER BY id DESC').all());
 });
-r.delete('/media/:id', requireWrite, (req: AuthedRequest, res) => {
+r.delete('/media/:id', requireWrite, (req: AuthedRequest, res: Response) => {
   const m: any = db.prepare('SELECT * FROM media WHERE id=?').get(req.params.id);
   if (m?.file_path) {
     const fp = path.join(UPLOAD_DIR, path.basename(m.file_path));
@@ -175,15 +175,15 @@ r.delete('/media/:id', requireWrite, (req: AuthedRequest, res) => {
 });
 
 /* ================= CMS PAGE BUILDER ================= */
-r.get('/pages', requireAuth, requireAdmin, (_req, res) => {
+r.get('/pages', requireAuth, requireAdmin, (_req: AuthedRequest, res: Response) => {
   res.json(db.prepare('SELECT * FROM cms_pages ORDER BY slug').all());
 });
-r.get('/pages/:slug', (req, res) => {
+r.get('/pages/:slug', (req: AuthedRequest, res: Response) => {
   const page: any = db.prepare('SELECT * FROM cms_pages WHERE slug=?').get(req.params.slug);
   if (!page) return res.status(404).json({ error: 'Page not found' });
   res.json({ ...page, blocks: JSON.parse(page.blocks || '[]') });
 });
-r.put('/pages/:slug', requireAuth, requireAdmin, (req: AuthedRequest, res) => {
+r.put('/pages/:slug', requireAuth, requireAdmin, (req: AuthedRequest, res: Response) => {
   const { title, blocks } = req.body;
   db.prepare(`INSERT INTO cms_pages (slug,title,blocks,updated_at) VALUES (?,?,?,datetime('now'))
     ON CONFLICT(slug) DO UPDATE SET title=excluded.title, blocks=excluded.blocks, updated_at=datetime('now')`)
@@ -203,7 +203,7 @@ const EXPORTABLE: Record<string, { table: string; cols: string[]; sheet: string 
   exams: { table: 'exams', cols: ['id', 'school_id', 'name', 'session', 'standard', 'exam_center', 'center_code', 'exam_date', 'status'], sheet: 'Exams' },
 };
 
-r.get('/excel/export/:entity', requireAuth, (req, res) => {
+r.get('/excel/export/:entity', requireAuth, (req: AuthedRequest, res: Response) => {
   const cfg = EXPORTABLE[req.params.entity];
   if (!cfg) return res.status(404).json({ error: 'Unknown export entity' });
   const rows = db.prepare(`SELECT ${cfg.cols.join(',')} FROM ${cfg.table}`).all();
@@ -216,7 +216,7 @@ r.get('/excel/export/:entity', requireAuth, (req, res) => {
   res.send(buf);
 });
 
-r.get('/excel/template/:entity', requireAuth, (req, res) => {
+r.get('/excel/template/:entity', requireAuth, (req: AuthedRequest, res: Response) => {
   const cfg = EXPORTABLE[req.params.entity];
   if (!cfg) return res.status(404).json({ error: 'Unknown template entity' });
   const sample: Record<string, any> = {};
@@ -240,7 +240,7 @@ r.get('/excel/template/:entity', requireAuth, (req, res) => {
   res.send(buf);
 });
 
-r.post('/excel/import/:entity', requireAuth, requireWrite, upload.single('file'), (req: AuthedRequest, res) => {
+r.post('/excel/import/:entity', requireAuth, requireWrite, upload.single('file'), (req: AuthedRequest, res: Response) => {
   if (!req.file) return res.status(400).json({ error: 'Upload an .xlsx file' });
   const cfg = EXPORTABLE[req.params.entity];
   if (!cfg) return res.status(404).json({ error: 'Unknown import entity' });
