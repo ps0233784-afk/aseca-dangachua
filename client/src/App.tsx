@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './auth';
 import { Loading } from './components/ui';
 import PublicLayout from './pages/PublicLayout';
+import HomeNew from './pages/HomeNew';
 import { HomePage, AboutPage, PublicSchools, PublicNotices, PublicEvents, ContactPage } from './pages/public-site';
 import LoginPage from './pages/Login';
 import AdminLayout from './pages/AdminLayout';
@@ -32,7 +33,7 @@ export default function App() {
     <Routes>
       {/* Public website */}
       <Route element={<PublicLayout />}>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<HomeNew />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/schools" element={<PublicSchools />} />
         <Route path="/notices" element={<PublicNotices />} />
