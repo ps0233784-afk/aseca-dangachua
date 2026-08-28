@@ -154,15 +154,57 @@ r.get('/public/home', (_req, res) => {
   const schools = db.prepare(`SELECT s.id,s.name,s.ol_chiki_name,s.village,s.po,s.ps,s.district,s.pin,s.headmaster,s.type,
     (SELECT COUNT(*) FROM students st WHERE st.school_id=s.id AND st.status='active') student_count
     FROM schools s WHERE s.status!='archived'`).all();
-  const notices = db.prepare('SELECT title,body,category,priority,date FROM notices ORDER BY date DESC LIMIT 6').all();
-  const events = db.prepare('SELECT title,description,date,venue,category FROM events ORDER BY date LIMIT 6').all();
+
+  const notices = db.prepare(
+    'SELECT title,body,category,priority,date FROM notices ORDER BY date DESC LIMIT 6'
+  ).all();
+
+  const events = db.prepare(
+    'SELECT title,description,date,venue,category FROM events ORDER BY date LIMIT 6'
+  ).all();
+
+  // Public-safe SMC projection.
+  // Deliberately excludes mobile numbers, father names and other private fields.
+  // Member photos are taken from the existing media library using the title:
+  // SMC-{memberId}-{schoolId}
+  const committeeRows = db.prepare(`
+    SELECT m.id, m.school_id, s.name AS school_name, s.ol_chiki_name AS school_olchiki,
+      m.sl_no, m.name, m.designation
+    FROM smc_members m
+    JOIN schools s ON s.id = m.school_id
+    ORDER BY m.school_id, m.sl_no
+  `).all() as any[];
+
+  const photoFor = (memberId: number, schoolId: number) => {
+    const title = `SMC-${memberId}-${schoolId}`;
+    const row = db.prepare(
+      "SELECT file_path FROM media WHERE title = ? AND type = 'image' ORDER BY id DESC LIMIT 1"
+    ).get(title) as any;
+    return row ? row.file_path : null;
+  };
+
+  const committee = committeeRows.map((m) => ({
+    ...m,
+    photo: photoFor(m.id, m.school_id),
+  }));
+
+  // Existing admin-uploaded media for the public gallery.
+  const media = db.prepare(
+    'SELECT title, file_path, type FROM media ORDER BY id DESC LIMIT 24'
+  ).all();
+
   const stats = {
     schools: (db.prepare('SELECT COUNT(*) c FROM schools').get() as any).c,
     students: (db.prepare("SELECT COUNT(*) c FROM students WHERE status='active'").get() as any).c,
     teachers: (db.prepare("SELECT COUNT(*) c FROM teachers WHERE status='active'").get() as any).c,
+    staff: (db.prepare("SELECT COUNT(*) c FROM staff WHERE status='active'").get() as any).c,
     books: (db.prepare('SELECT COUNT(*) c FROM books').get() as any).c,
+    hostels: (db.prepare('SELECT COUNT(*) c FROM hostels').get() as any).c,
+    committees: (db.prepare('SELECT COUNT(*) c FROM schools').get() as any).c,
+    events: (db.prepare('SELECT COUNT(*) c FROM events').get() as any).c,
   };
-  res.json({ schools, notices, events, stats });
+
+  res.json({ schools, notices, events, committee, media, stats });
 });
 
 /* ---------- Organization profile (for letterheads) ---------- */
