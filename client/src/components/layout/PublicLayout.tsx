@@ -1,170 +1,153 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { useState } from 'react';
-import { Menu, X, GraduationCap, LogIn } from 'lucide-react';
+import { Outlet, Link, NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import {
+  ArrowUpRight,
+  Facebook,
+  Instagram,
+  LogIn,
+  Mail,
+  MapPin,
+  Menu,
+  Phone,
+  X,
+} from 'lucide-react';
+import { organization } from '../../lib/publicData';
+
+const navigation = [
+  { label: 'Home', to: '/' },
+  { label: 'About', to: '/about' },
+  { label: 'Schools', to: '/schools' },
+  { label: 'Managing Body', to: '/managing-body' },
+  { label: 'Contact', to: '/contact' },
+];
 
 export default function PublicLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
+  useEffect(() => {
+    setMobileOpen(false);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-white" />
-              </div>
-              <div className="hidden sm:block">
-                <div className="font-display font-bold text-gray-900 text-lg leading-tight">ASECA</div>
-                <div className="text-xs text-gray-500">Dangachua Branch</div>
-              </div>
+    <div className="public-shell min-h-screen bg-[#f4f2e9] text-[#17221c]">
+      <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled ? 'px-3 pt-3 sm:px-5' : ''}`}>
+        <div className={`mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-5 transition-all duration-300 sm:px-8 ${scrolled ? 'rounded-2xl border border-white/10 bg-[#0b1510]/90 shadow-2xl shadow-black/20 backdrop-blur-xl' : 'border-b border-white/10'}`}>
+          <Link to="/" className="group flex min-w-0 items-center gap-3 text-white" aria-label="ASECA Dangachua home">
+            <span className="public-logo-mark grid h-11 w-11 shrink-0 place-items-center rounded-full border border-lime-300/40 bg-lime-300 font-olchiki text-2xl font-bold text-[#0c1711] transition group-hover:rotate-6">ᱚ</span>
+            <span className="min-w-0">
+              <strong className="public-display block truncate text-sm font-extrabold tracking-[-0.02em] sm:text-base">ASECA DANGACHUA</strong>
+              <span className="block truncate text-[9px] font-bold uppercase tracking-[0.2em] text-white/45 sm:text-[10px]">Education · Culture · Community</span>
+            </span>
+          </Link>
+
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
+            {navigation.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) => `rounded-full px-4 py-2 text-[13px] font-semibold transition ${isActive ? 'bg-white/10 text-lime-300' : 'text-white/65 hover:bg-white/5 hover:text-white'}`}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <Link to="/login" className="hidden items-center gap-2 rounded-full bg-lime-300 px-5 py-3 text-xs font-extrabold text-[#0b1510] transition hover:bg-lime-200 sm:inline-flex">
+              ERP Login <ArrowUpRight className="h-4 w-4" />
             </Link>
-
-            {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-1">
-              <NavLink to="/" current={location.pathname}>Home</NavLink>
-              <NavLink to="/about" current={location.pathname}>About</NavLink>
-              <NavLink to="/schools" current={location.pathname}>Schools</NavLink>
-              <NavLink to="/dictionary" current={location.pathname}>Dictionary</NavLink>
-              <NavLink to="/olchiki-lab" current={location.pathname}>Ol Chiki Lab</NavLink>
-              <NavLink to="/managing-body" current={location.pathname}>Managing Body</NavLink>
-              <NavLink to="/notices" current={location.pathname}>Notices</NavLink>
-              <NavLink to="/events" current={location.pathname}>Events</NavLink>
-              <NavLink to="/gallery" current={location.pathname}>Gallery</NavLink>
-              <NavLink to="/contact" current={location.pathname}>Contact</NavLink>
-            </div>
-
-            {/* Auth Button */}
-            <div className="hidden md:flex items-center gap-3">
-              <Link to="/login" className="btn-ghost">
-                <LogIn className="w-4 h-4 mr-2" />
-                Login
-              </Link>
-            </div>
-
-            {/* Mobile menu button */}
             <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+              type="button"
+              className="grid h-11 w-11 place-items-center rounded-full border border-white/15 text-white lg:hidden"
+              onClick={() => setMobileOpen((open) => !open)}
+              aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'}
+              aria-expanded={mobileOpen}
             >
-              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Nav */}
         {mobileOpen && (
-          <div className="md:hidden glass border-t border-white/20 animate-fade-in">
-            <div className="px-4 py-4 space-y-1">
-              <MobileNavLink to="/" onClick={() => setMobileOpen(false)}>Home</MobileNavLink>
-              <MobileNavLink to="/about" onClick={() => setMobileOpen(false)}>About</MobileNavLink>
-              <MobileNavLink to="/schools" onClick={() => setMobileOpen(false)}>Schools</MobileNavLink>
-              <MobileNavLink to="/dictionary" onClick={() => setMobileOpen(false)}>Dictionary</MobileNavLink>
-              <MobileNavLink to="/olchiki-lab" onClick={() => setMobileOpen(false)}>Ol Chiki Lab</MobileNavLink>
-              <MobileNavLink to="/managing-body" onClick={() => setMobileOpen(false)}>Managing Body</MobileNavLink>
-              <MobileNavLink to="/notices" onClick={() => setMobileOpen(false)}>Notices</MobileNavLink>
-              <MobileNavLink to="/events" onClick={() => setMobileOpen(false)}>Events</MobileNavLink>
-              <MobileNavLink to="/gallery" onClick={() => setMobileOpen(false)}>Gallery</MobileNavLink>
-              <MobileNavLink to="/contact" onClick={() => setMobileOpen(false)}>Contact</MobileNavLink>
-              <div className="pt-3 border-t border-gray-200">
-                <Link to="/login" className="btn-primary w-full" onClick={() => setMobileOpen(false)}>
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Login
-                </Link>
-              </div>
-            </div>
+          <div className="mx-3 mt-2 overflow-hidden rounded-3xl border border-white/10 bg-[#0b1510]/95 p-3 shadow-2xl backdrop-blur-xl sm:mx-5 lg:hidden">
+            {navigation.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) => `flex items-center justify-between rounded-2xl px-5 py-4 text-sm font-bold transition ${isActive ? 'bg-lime-300 text-[#0b1510]' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}
+              >
+                {item.label}<ArrowUpRight className="h-4 w-4" />
+              </NavLink>
+            ))}
+            <Link to="/login" className="mt-2 flex items-center justify-between rounded-2xl border border-white/10 px-5 py-4 text-sm font-bold text-white">
+              ERP Login <LogIn className="h-4 w-4 text-lime-300" />
+            </Link>
           </div>
         )}
-      </nav>
+      </header>
 
-      {/* Main Content */}
-      <main className="flex-1 pt-16">
-        <Outlet />
-      </main>
+      <main><Outlet /></main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center">
-                  <GraduationCap className="w-6 h-6 text-white" />
-                </div>
+      <footer className="relative overflow-hidden bg-[#07100b] text-white">
+        <div className="public-grid absolute inset-0 opacity-20" />
+        <div className="relative mx-auto max-w-7xl px-5 pb-8 pt-20 sm:px-8 lg:px-10">
+          <div className="grid gap-14 border-b border-white/10 pb-16 lg:grid-cols-[1.35fr_.65fr_.8fr]">
+            <div>
+              <div className="flex items-center gap-3">
+                <span className="grid h-12 w-12 place-items-center rounded-full bg-lime-300 font-olchiki text-2xl font-bold text-[#0b1510]">ᱚ</span>
                 <div>
-                  <div className="font-display font-bold text-white text-lg">BRANCH ASECA DANGACHUA</div>
-                  <div className="text-sm text-gray-400">Education • Culture • Community</div>
+                  <strong className="public-display block text-lg font-extrabold">{organization.name}</strong>
+                  <span className="text-xs text-white/45">{organization.olChikiName}</span>
                 </div>
               </div>
-              <p className="text-sm text-gray-400 max-w-md">
-                Adivasi Socio-Educational & Cultural Association, Odisha. Promoting Santali education through Ol Chiki script, preserving indigenous culture, and strengthening Adivasi communities across Kendujhar district.
+              <p className="mt-6 max-w-lg text-sm leading-7 text-white/50">
+                Community-led education that keeps Santali language, Ol Chiki learning and Adivasi identity at the heart of every classroom.
               </p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-white mb-3">Quick Links</h3>
-              <div className="space-y-2 text-sm">
-                <Link to="/schools" className="block hover:text-white transition">Our Schools</Link>
-                <Link to="/dictionary" className="block hover:text-white transition">Santali Dictionary</Link>
-                <Link to="/olchiki-lab" className="block hover:text-white transition">Ol Chiki Lab</Link>
-                <Link to="/managing-body" className="block hover:text-white transition">Managing Body</Link>
+              <div className="mt-7 flex gap-3">
+                {[Facebook, Instagram].map((Icon, index) => (
+                  <a key={index} href="#" aria-label={index === 0 ? 'Facebook' : 'Instagram'} className="grid h-10 w-10 place-items-center rounded-full border border-white/10 text-white/60 transition hover:border-lime-300 hover:text-lime-300">
+                    <Icon className="h-4 w-4" />
+                  </a>
+                ))}
               </div>
             </div>
 
             <div>
-              <h3 className="font-semibold text-white mb-3">Contact</h3>
-              <div className="space-y-2 text-sm text-gray-400">
-                <p>At-Dangachua, P.O.-Bidyadharpur</p>
-                <p>P.S.-Soso, Dist-Kendujhar</p>
-                <p>PIN-758078, Odisha</p>
-                <p className="pt-2">
-                  <a href="mailto:info@branchasecadangachua.org" className="hover:text-white transition">
-                    info@branchasecadangachua.org
-                  </a>
-                </p>
+              <p className="mb-5 text-[10px] font-extrabold uppercase tracking-[0.25em] text-lime-300">Explore</p>
+              <div className="space-y-3">
+                {navigation.slice(1).map((item) => (
+                  <Link key={item.to} to={item.to} className="block text-sm font-medium text-white/55 transition hover:translate-x-1 hover:text-white">{item.label}</Link>
+                ))}
+                <Link to="/login" className="block text-sm font-medium text-white/55 transition hover:translate-x-1 hover:text-white">ERP Portal</Link>
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-5 text-[10px] font-extrabold uppercase tracking-[0.25em] text-lime-300">Get in touch</p>
+              <div className="space-y-4 text-sm text-white/55">
+                <a href={`mailto:${organization.email}`} className="flex items-start gap-3 transition hover:text-white"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-lime-300" />{organization.email}</a>
+                <a href={`tel:${organization.phone.replace(/\s/g, '')}`} className="flex items-start gap-3 transition hover:text-white"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-lime-300" />{organization.phone}</a>
+                <p className="flex items-start gap-3 leading-6"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-lime-300" />{organization.address}</p>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-gray-800 text-center text-sm text-gray-500">
-            <p>© 2026 BRANCH ASECA DANGACHUA. All rights reserved.</p>
-            <p className="mt-1">
-              ᱚ.ᱟ.ᱮ.ᱥ.ᱮ.ᱠ.ᱮ ᱩᱰᱤᱥᱟ ᱥᱟᱠᱷᱟ ᱫᱟᱸᱜᱩᱣᱟᱹ ᱠᱮᱱᱫᱩᱡᱷᱟᱹᱨ, ᱩᱰᱤᱥᱟ
-            </p>
+          <div className="flex flex-col gap-3 pt-7 text-[11px] text-white/35 sm:flex-row sm:items-center sm:justify-between">
+            <p>© 2026 {organization.name}. All rights reserved.</p>
+            <p>{organization.registration} · Kendujhar, Odisha</p>
           </div>
         </div>
       </footer>
     </div>
-  );
-}
-
-function NavLink({ to, current, children }: { to: string; current: string; children: React.ReactNode }) {
-  const isActive = current === to;
-  return (
-    <Link
-      to={to}
-      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-        isActive
-          ? 'text-brand-600 bg-brand-50'
-          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-      }`}
-    >
-      {children}
-    </Link>
-  );
-}
-
-function MobileNavLink({ to, onClick, children }: { to: string; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition"
-    >
-      {children}
-    </Link>
   );
 }

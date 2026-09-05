@@ -3,6 +3,10 @@ import { useAuth } from './lib/auth';
 import PublicLayout from './components/layout/PublicLayout';
 import AppLayout from './components/layout/AppLayout';
 import HomePage from './pages/public/Home';
+import AboutPage from './pages/public/About';
+import PublicSchoolsPage from './pages/public/Schools';
+import ManagingBodyPage from './pages/public/ManagingBody';
+import ContactPage from './pages/public/Contact';
 import LoginPage from './pages/auth/Login';
 import DashboardPage from './pages/app/Dashboard';
 import SchoolsPage from './pages/app/Schools';
@@ -33,6 +37,10 @@ export default function App() {
       {/* Public website */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/schools" element={<PublicSchoolsPage />} />
+        <Route path="/managing-body" element={<ManagingBodyPage />} />
+        <Route path="/contact" element={<ContactPage />} />
       </Route>
 
       {/* Auth */}
