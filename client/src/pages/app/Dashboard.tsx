@@ -41,10 +41,10 @@ export default function DashboardPage() {
     { label: 'Students', value: stats.students, icon: Users, color: 'bg-forest-50 text-forest-600', link: '/app/students' },
     { label: 'Teachers', value: stats.teachers, icon: UserCheck, color: 'bg-blue-50 text-blue-600', link: '/app/teachers' },
     { label: 'Staff', value: stats.staff, icon: UserCog, color: 'bg-purple-50 text-purple-600', link: '/app/staff' },
-    { label: 'Exams', value: stats.exams, icon: ClipboardList, color: 'bg-earth-50 text-earth-600', link: '/app/exams' },
-    { label: 'Notices', value: stats.notices, icon: Bell, color: 'bg-amber-50 text-amber-600', link: '/app/notices' },
-    { label: 'Events', value: stats.events, icon: Calendar, color: 'bg-pink-50 text-pink-600', link: '/app/events' },
-    { label: 'Books', value: stats.books, icon: BookOpen, color: 'bg-teal-50 text-teal-600', link: '/app/library' },
+    { label: 'Exams', value: stats.exams, icon: ClipboardList, color: 'bg-earth-50 text-earth-600', link: '/app/workspace/examinations' },
+    { label: 'Notices', value: stats.notices, icon: Bell, color: 'bg-amber-50 text-amber-600', link: '/app/workspace/notices' },
+    { label: 'Events', value: stats.events, icon: Calendar, color: 'bg-pink-50 text-pink-600', link: '/app/workspace/notices' },
+    { label: 'Books', value: stats.books, icon: BookOpen, color: 'bg-teal-50 text-teal-600', link: '/app/workspace/library' },
   ] : [];
 
   return (
@@ -96,7 +96,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 card p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-display text-lg font-bold text-gray-900">Recent Notices</h2>
-            <Link to="/app/notices" className="text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center">
+            <Link to="/app/workspace/notices" className="text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center">
               View All <ArrowRight className="w-4 h-4 ml-1" />
             </Link>
           </div>

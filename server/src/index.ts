@@ -10,7 +10,7 @@ import usersRoutes from './routes/users';
 import studentsRoutes from './routes/students';
 import peopleRoutes from './routes/people';
 import academicRoutes from './routes/academic';
-import { requireAuth } from './middleware/auth';
+import contentRoutes from './routes/content';
 
 async function start() {
   // Initialize database
@@ -33,14 +33,26 @@ async function start() {
     res.json({ ok: true, app: 'BRANCH ASECA DANGACHUA', version: '2.0.0', time: new Date().toISOString() });
   });
 
+  // Small dependency-free login throttle for the demo adapter. Production should use a shared store.
+  const authHits = new Map<string, { count: number; resetAt: number }>();
+  app.use('/api/auth/login', (req, res, next) => {
+    const key = `${req.ip}:${String(req.body?.email || '').toLowerCase()}`;
+    const now = Date.now(); const current = authHits.get(key);
+    if (!current || current.resetAt < now) authHits.set(key, { count: 1, resetAt: now + 15 * 60 * 1000 });
+    else if (current.count >= 10) return res.status(429).json({ error: 'Too many login attempts. Try again later.' });
+    else current.count += 1;
+    next();
+  });
+
   // API routes
   app.use('/api', authRoutes);
   app.use('/api', dashboardRoutes);
   app.use('/api', schoolsRoutes);
-  app.use('/api', requireAuth, usersRoutes);
+  app.use('/api', usersRoutes);
   app.use('/api', studentsRoutes);
   app.use('/api', peopleRoutes);
   app.use('/api', academicRoutes);
+  app.use('/api', contentRoutes);
 
   // 404 for unknown API routes
   app.use('/api', (_req, res) => {

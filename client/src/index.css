@@ -18,6 +18,34 @@
 }
 
 @layer components {
+  .eyebrow {
+    @apply text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#839188];
+  }
+
+  .page-heading {
+    @apply mt-2 font-display text-3xl font-extrabold tracking-[-0.045em] text-[#18221c] sm:text-4xl;
+  }
+
+  .page-subheading {
+    @apply mt-2 text-sm leading-7 text-[#75837a];
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#7e8c83];
+  }
+
+  .btn-dark {
+    @apply inline-flex items-center justify-center rounded-xl bg-[#173121] px-4 py-3 text-sm font-extrabold text-[#c9f36a] transition hover:bg-[#23492f] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-light {
+    @apply inline-flex items-center justify-center rounded-xl border border-[#dfe8e0] bg-white px-4 py-3 text-sm font-bold text-[#526258] transition hover:bg-[#edf2ed];
+  }
+
+  .app-shell {
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  }
+
   .glass {
     @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-lg;
   }

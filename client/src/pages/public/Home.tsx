@@ -6,6 +6,7 @@ import {
   Check,
   ChevronRight,
   GraduationCap,
+  Image,
   Languages,
   Leaf,
   MapPin,
@@ -125,6 +126,18 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* CMS-managed heritage feature — the content below is intentionally source-aware. */}
+      <section className="relative overflow-hidden bg-[#efe6d5] px-5 py-20 sm:px-8 sm:py-28 lg:px-10">
+        <div className="absolute -right-16 top-8 font-olchiki text-[18rem] font-bold leading-none text-emerald-900/[.05]" aria-hidden="true">ᱚ</div>
+        <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-center">
+          <div className="relative overflow-hidden rounded-[2rem] bg-[#0b1710] p-5 text-white shadow-xl sm:p-7">
+            <div className="grid aspect-[4/3] place-items-center rounded-[1.5rem] border border-white/10 bg-[#132219]"><span className="font-olchiki text-[9rem] text-lime-300/20 sm:text-[12rem]">ᱚ</span><span className="absolute bottom-10 rounded-full bg-amber-300 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[.16em] text-[#0b1710]">Portrait pending verified upload</span></div>
+            <div className="mt-5 flex items-center justify-between"><span className="text-[10px] font-extrabold uppercase tracking-[.2em] text-lime-300">Heritage profile</span><span className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-bold text-white/55">Editorial / source-aware</span></div>
+          </div>
+          <div><div className="public-kicker public-kicker-dark mb-5"><span />Pandit Raghunath Murmu</div><h2 className="public-display max-w-3xl text-5xl font-extrabold leading-[.95] tracking-[-.06em] text-[#101a14] sm:text-7xl">A place for<br /><em className="not-italic text-emerald-700">verified memory.</em></h2><p className="mt-6 max-w-2xl text-base leading-8 text-[#34483c]/70">BRANCH ASECA DANGACHUA keeps a dedicated, editable heritage profile ready for an officially verified biography, historical images, timeline, contributions and references.</p><div className="mt-7 flex flex-wrap gap-3"><Link to="/pandit-raghunath-murmu" className="inline-flex items-center gap-3 rounded-full bg-[#101a14] px-6 py-4 text-sm font-extrabold text-white">Read full biography <ArrowUpRight className="h-4 w-4 text-lime-300" /></Link><span className="inline-flex items-center rounded-full border border-amber-700/20 bg-amber-200/60 px-4 py-3 text-xs font-bold text-amber-950">No unsourced facts are published</span></div></div>
+        </div>
+      </section>
+
       <div className="overflow-hidden border-y border-[#122018]/10 bg-lime-300 py-4 text-[#0b1510]">
         <div className="value-track flex min-w-max items-center gap-8">
           {[...values, ...values].map((value, index) => (
@@ -227,6 +240,19 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Language tools */}
+      <section className="bg-[#0b1710] px-5 py-20 text-white sm:px-8 sm:py-28 lg:px-10">
+        <div className="mx-auto max-w-7xl"><div className="grid gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-end"><div><div className="public-kicker"><span />Language tools</div><h2 className="public-display mt-5 text-5xl font-extrabold leading-[.96] tracking-[-.055em] sm:text-6xl">Make room for<br /><span className="text-lime-300">every voice.</span></h2></div><p className="max-w-xl text-base leading-8 text-white/50 lg:justify-self-end">Explore the source-aware Santali Dictionary or let children learn Ol Chiki through small, playful steps. Both features connect to editor-managed content and real audio when configured.</p></div><div className="mt-12 grid gap-4 md:grid-cols-2"><Link to="/dictionary" className="group rounded-[2rem] bg-lime-300 p-7 text-[#0b1710] transition hover:-translate-y-1 sm:p-9"><BookOpen className="h-7 w-7" /><h3 className="public-display mt-16 text-3xl font-extrabold tracking-[-.04em]">Santali Dictionary</h3><p className="mt-3 max-w-sm text-sm leading-7 text-[#34483c]/70">Search Ol Chiki, Roman, Odia, Hindi and English with source and verification context.</p><span className="mt-6 inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.14em]">Open dictionary <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></Link><Link to="/olchiki-lab" className="group rounded-[2rem] border border-white/10 bg-white/[.05] p-7 transition hover:-translate-y-1 hover:bg-white/[.08] sm:p-9"><GraduationCap className="h-7 w-7 text-lime-300" /><h3 className="public-display mt-16 text-3xl font-extrabold tracking-[-.04em]">Ol Chiki Lab</h3><p className="mt-3 max-w-sm text-sm leading-7 text-white/50">Learn, listen, practise and quiz with verified letter cards and configured audio.</p><span className="mt-6 inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.14em] text-lime-300">Start exploring <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></Link></div></div>
+      </section>
+
+      <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-10">
+        <div className="mx-auto max-w-7xl"><div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><div className="public-kicker public-kicker-dark"><span />People & resources</div><h2 className="public-display mt-5 text-5xl font-extrabold leading-none tracking-[-.055em]">The work is carried<br /><em className="not-italic text-emerald-700">by many hands.</em></h2></div><p className="max-w-xl text-sm leading-7 text-[#34483c]/65 sm:text-base">Meet the people who guide our schools and explore the approved resources, gallery and cultural stories that administrators publish for the community.</p></div><div className="mt-12 grid gap-4 md:grid-cols-3"><Link to="/managing-body" className="group rounded-[1.8rem] bg-lime-300 p-7 text-[#0b1710] transition hover:-translate-y-1"><Users className="h-7 w-7" /><h3 className="public-display mt-12 text-2xl font-extrabold tracking-[-.035em]">Managing Body</h3><p className="mt-4 text-sm leading-7 text-[#34483c]/65">Photographic profiles, responsibility and school connection.</p><span className="mt-6 inline-flex items-center gap-2 text-xs font-extrabold">Meet the team <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></Link><Link to="/about" className="group rounded-[1.8rem] bg-[#cde0ff] p-7 text-[#0b1710] transition hover:-translate-y-1"><Image className="h-7 w-7" /><h3 className="public-display mt-12 text-2xl font-extrabold tracking-[-.035em]">Gallery & culture</h3><p className="mt-4 text-sm leading-7 text-[#34483c]/65">Approved images, stories, festivals and traditional knowledge with references.</p><span className="mt-6 inline-flex items-center gap-2 text-xs font-extrabold">Explore the story <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></Link><Link to="/contact" className="group rounded-[1.8rem] bg-amber-300 p-7 text-[#0b1710] transition hover:-translate-y-1"><BookOpen className="h-7 w-7" /><h3 className="public-display mt-12 text-2xl font-extrabold tracking-[-.035em]">Learning resources</h3><p className="mt-4 text-sm leading-7 text-[#34483c]/65">A growing shelf of classroom and community materials managed through the CMS.</p><span className="mt-6 inline-flex items-center gap-2 text-xs font-extrabold">Ask the branch <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></Link></div></div>
+      </section>
+
+      <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-10">
+        <div className="mx-auto max-w-7xl"><div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><div className="public-kicker public-kicker-dark"><span />What’s happening</div><h2 className="public-display mt-5 text-5xl font-extrabold leading-none tracking-[-.055em]">Notices, events<br /><em className="not-italic text-emerald-700">and milestones.</em></h2></div><Link to="/contact" className="inline-flex items-center gap-2 text-sm font-extrabold">Talk to the branch <ArrowUpRight className="h-4 w-4 text-emerald-800" /></Link></div><div className="mt-12 grid gap-4 md:grid-cols-3">{['Learning network update', 'Ol Chiki Lab editorial review', 'Community calendar'].map((item, index) => <article key={item} className={`rounded-[1.8rem] p-7 ${index === 1 ? 'bg-amber-300' : index === 2 ? 'bg-[#cde0ff]' : 'bg-lime-300'}`}><span className="text-[10px] font-extrabold uppercase tracking-[.18em]">DEMO NOTICE</span><h3 className="public-display mt-12 text-2xl font-extrabold tracking-[-.035em]">{item}</h3><p className="mt-4 text-sm leading-7 text-[#34483c]/65">Published content from the admin notice and events workspace will appear here when approved.</p><span className="mt-6 inline-flex items-center gap-2 text-xs font-extrabold">Editorial queue <ArrowUpRight className="h-4 w-4" /></span></article>)}</div></div>
       </section>
 
       <section className="px-5 pb-24 sm:px-8 sm:pb-32 lg:px-10">

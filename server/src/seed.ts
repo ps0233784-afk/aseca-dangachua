@@ -19,6 +19,12 @@ async function seed() {
     '+91-9430000001', 'info@branchasecadangachua.org', 'https://branchasecadangachua.org'
   );
 
+  // Configurable role and permission catalog. User.role is kept as a compatibility/read model.
+  const roleKeys = ['super_admin', 'org_admin', 'school_admin', 'principal', 'teacher', 'librarian', 'student', 'parent', 'staff'];
+  const roleIds: Record<string, string> = {};
+  roleKeys.forEach((key) => { const roleId = generateId(); roleIds[key] = roleId; db.prepare('INSERT INTO roles (id, organization_id, name, key, description) VALUES (?, ?, ?, ?, ?)').run(roleId, orgId, key.replace(/_/g, ' '), key, `Configurable ${key.replace(/_/g, ' ')} role`); });
+  ['schools.read', 'schools.write', 'students.read', 'students.write', 'attendance.write', 'marks.write', 'content.write', 'media.write', 'audit.read'].forEach((key) => db.prepare('INSERT INTO permissions (id, key, description) VALUES (?, ?, ?)').run(generateId(), key, `Permission: ${key}`));
+
   // Users
   const users = [
     { name: 'Super Administrator', email: 'superadmin@aseca.org', password: 'admin@123', role: 'super_admin' },
@@ -122,24 +128,51 @@ async function seed() {
     db.prepare('INSERT INTO books (id, school_id, title, author, copies, available) VALUES (?, ?, ?, ?, ?, ?)').run(generateId(), schoolIds[0], t, a, c, c);
   });
 
-  // Historical Profile
-  db.prepare(`INSERT INTO historical_profiles (id, slug, name, summary, biography, sources, status) VALUES (?, ?, ?, ?, ?, ?, ?)`).run(
-    generateId(), 'pandit-raghunath-murmu', 'Pandit Raghunath Murmu', 'Creator of the Ol Chiki script for the Santali language.',
-    'Pandit Raghunath Murmu (1905-1982) was a Santali guru who created the Ol Chiki script.', 'Historical records', 'published'
+  // Historical Profile — intentionally editorial demo content, not published historical fact.
+  const heritageId = generateId();
+  db.prepare(`INSERT INTO historical_profiles (id, slug, name, summary, biography, sources, editorial_note, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    heritageId, 'pandit-raghunath-murmu', 'Pandit Raghunath Murmu', 'DEMO DATA — replace this summary with an officially verified contribution highlight.',
+    'DEMO DATA — replace this biography with the organization’s officially verified biography/autobiography. Historical claims require a source before publication.', 'DEMO DATA — source/reference required', 'This record is a safe editorial placeholder. Do not present as genuine history.', 'draft'
+  );
+  db.prepare('INSERT INTO historical_profile_sections (id, profile_id, section_type, title, body, source_note, display_order, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
+    generateId(), heritageId, 'editorial', 'Verification note', 'Replace all demo biography and images with approved source material before publishing.', 'Admin-provided editorial note', 1, 'draft'
   );
 
   // Dictionary
   ([['ᱫᱟᱹᱜ', 'dag', 'water', 'noun', 'The clear liquid essential for life.'], ['ᱡᱚᱢ', 'jom', 'eat', 'verb', 'To consume food.'], ['ᱚᱲᱟᱜ', 'orag', 'house', 'noun', 'A dwelling place.'], ['ᱥᱮᱨᱢᱟ', 'serma', 'year', 'noun', 'A period of twelve months.'], ['ᱦᱚᱲ', 'hor', 'person', 'noun', 'A human being.']] as [string, string, string, string, string][]).forEach(([w, r, e, p, d]) => {
-    db.prepare('INSERT INTO dictionary_entries (id, word, roman, english, part_of_speech, definition, status, verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(generateId(), w, r, e, p, d, 'active', 1);
+    db.prepare('INSERT INTO dictionary_entries (id, word, roman, english, part_of_speech, definition, source, status, verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run(generateId(), w, r, e, p, `DEMO DATA — ${d}`, 'DEMO DATA — replace with a source-verified dictionary reference', 'draft', 0);
   });
 
   // Ol Chiki Letters
   ([['ᱚ', 'O', 'o'], ['ᱛ', 'Ot', 'ot'], ['ᱜ', 'Ag', 'ag'], ['ᱝ', 'Ang', 'ang'], ['ᱞ', 'Al', 'al'], ['ᱟ', 'A', 'a'], ['ᱵ', 'Ab', 'ab'], ['ᱫ', 'Ad', 'ad'], ['ᱢ', 'Am', 'am']] as [string, string, string][]).forEach(([c, n, r], i) => {
-    db.prepare('INSERT INTO olchiki_letters (id, character, name, roman, display_order, status) VALUES (?, ?, ?, ?, ?, ?)').run(generateId(), c, n, r, i + 1, 'active');
+    db.prepare('INSERT INTO olchiki_letters (id, character, name, roman, display_order, status) VALUES (?, ?, ?, ?, ?, ?)').run(generateId(), c, n, r, i + 1, 'draft');
   });
 
+  // Homepage CMS — the public sequence is editable, reorderable and hideable.
+  const homePageId = generateId();
+  db.prepare('INSERT INTO pages (id, slug, title, sections, display_order, status) VALUES (?, ?, ?, ?, ?, ?)').run(homePageId, 'home', 'Homepage', JSON.stringify(['hero', 'heritage', 'about', 'schools', 'dictionary', 'olchiki-lab', 'managing-body', 'achievements', 'notices', 'events', 'gallery', 'culture', 'resources', 'contact', 'footer']), 1, 'published');
+  const homeBlocks = [
+    ['Hero', 'Welcome', 'Homepage welcome block — replace copy and media from the Page Builder.'],
+    ['Pandit Raghunath Murmu', 'Pandit Raghunath Murmu heritage profile', 'DEMO DATA — link only to verified biography, images and sources before publishing.'],
+    ['Welcome', 'About BRANCH ASECA DANGACHUA', 'Community-led Santali education and school administration.'],
+    ['School list', 'Our Schools', 'Connected school directory with school-wise records.'],
+    ['Santali Dictionary', 'Santali Dictionary', 'Source-aware dictionary block.'],
+    ['Ol Chiki Lab', 'Ol Chiki Lab', 'Child-friendly learning block with configured audio.'],
+    ['Managing Body', 'Managing Body', 'Photographic organization and school leadership profiles.'],
+    ['Notices', 'Notices & Events', 'Approved public communications.'],
+    ['Gallery', 'Gallery', 'Media-library powered albums and credits.'],
+    ['Culture', 'Santali Culture', 'Administrator-provided cultural content with references.'],
+    ['Resources', 'Educational Resources', 'Approved classroom and community resources.'],
+    ['Contact', 'Contact', 'Branch office contact details.'],
+    ['Footer', 'Footer', 'Organization footer, menus and social links.'],
+  ];
+  homeBlocks.forEach(([type, title, content], index) => db.prepare('INSERT INTO page_blocks (id, page_id, block_type, title, content, config, display_order, is_visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(generateId(), homePageId, type, title, content, JSON.stringify({ desktop: true, tablet: true, mobile: true, spacing: 'comfortable', radius: '2rem' }), index + 1, 1));
+
+  // Editorial resource demo, clearly labelled for replacement by administrators.
+  db.prepare('INSERT INTO educational_resources (id, title, description, category, type, status, display_order) VALUES (?, ?, ?, ?, ?, ?, ?)').run(generateId(), 'DEMO RESOURCE — replace before publishing', 'A placeholder record showing how verified PDFs, audio and classroom links are managed.', 'Editorial demo', 'document', 'draft', 1);
+
   // Audit
-  db.prepare('INSERT INTO audit_logs (id, username, action, entity, detail) VALUES (?, ?, ?, ?, ?)').run(generateId(), 'system', 'SEED', 'database', 'Database initialized with demo data');
+  db.prepare('INSERT INTO audit_logs (id, username, action, entity, detail) VALUES (?, ?, ?, ?, ?)').run(generateId(), 'system', 'SEED', 'database', 'Database initialized with clearly labelled demo data');
 
   db.save();
   console.log('[seed] ✅ Database seeded successfully!');

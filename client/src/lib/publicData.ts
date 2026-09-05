@@ -101,6 +101,35 @@ export const committee = [
   { name: 'Sanjay Murmu', role: 'Executive Member', initials: 'SM' },
 ];
 
+export type DemoDictionaryEntry = {
+  id: string;
+  word: string;
+  ol_chiki: string;
+  roman: string;
+  odia: string;
+  hindi: string;
+  english: string;
+  part_of_speech: string;
+  definition: string;
+  example: string;
+  source: string;
+  verified: number;
+  status: string;
+  audio_url?: string;
+};
+
+// Deliberately marked demo content. Replace with source-verified language data before publishing.
+export const demoDictionaryEntries: DemoDictionaryEntry[] = [
+  { id: 'demo-1', word: 'Demo entry', ol_chiki: 'ᱫᱮᱢᱳ', roman: 'demo', odia: 'ଡେମୋ', hindi: 'डेमो', english: 'Sample word', part_of_speech: 'editorial placeholder', definition: 'DEMO DATA — this record is shown only to demonstrate the dictionary workflow.', example: 'Replace this example with a verified source.', source: 'Editorial demo record', verified: 0, status: 'draft' },
+];
+
+export const demoOlChikiLetters = [
+  { id: 'demo-letter-1', character: 'ᱚ', name: 'Demo letter', roman: 'demo', example_word: '', meaning: 'DEMO DATA — add a verified word and meaning.', sound_url: '', status: 'demo', display_order: 1 },
+  { id: 'demo-letter-2', character: 'ᱛ', name: 'Demo letter', roman: 'demo', example_word: '', meaning: 'DEMO DATA — add a verified word and meaning.', sound_url: '', status: 'demo', display_order: 2 },
+  { id: 'demo-letter-3', character: 'ᱜ', name: 'Demo letter', roman: 'demo', example_word: '', meaning: 'DEMO DATA — add a verified word and meaning.', sound_url: '', status: 'demo', display_order: 3 },
+  { id: 'demo-letter-4', character: 'ᱞ', name: 'Demo letter', roman: 'demo', example_word: '', meaning: 'DEMO DATA — add a verified word and meaning.', sound_url: '', status: 'demo', display_order: 4 },
+];
+
 export const milestones = [
   { year: '1964', text: 'ASECA Odisha registered with a mission to advance Adivasi education and culture.' },
   { year: '1998', text: 'Hans Hansli Ol-Itun Ashra opened its doors in Dangachua.' },

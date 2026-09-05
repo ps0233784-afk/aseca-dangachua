@@ -138,6 +138,18 @@ export function initSchema() {
       created_at TEXT DEFAULT (datetime('now'))
     );
     CREATE TABLE IF NOT EXISTS class_subjects (id TEXT PRIMARY KEY, class_id TEXT NOT NULL, subject_id TEXT NOT NULL, UNIQUE(class_id, subject_id));
+    CREATE TABLE IF NOT EXISTS roles (
+      id TEXT PRIMARY KEY, organization_id TEXT, name TEXT NOT NULL, key TEXT NOT NULL, description TEXT, status TEXT DEFAULT 'active', UNIQUE(organization_id, key)
+    );
+    CREATE TABLE IF NOT EXISTS permissions (
+      id TEXT PRIMARY KEY, key TEXT UNIQUE NOT NULL, description TEXT
+    );
+    CREATE TABLE IF NOT EXISTS role_permissions (
+      role_id TEXT NOT NULL, permission_id TEXT NOT NULL, PRIMARY KEY(role_id, permission_id)
+    );
+    CREATE TABLE IF NOT EXISTS user_roles (
+      user_id TEXT NOT NULL, role_id TEXT NOT NULL, school_id TEXT, PRIMARY KEY(user_id, role_id, school_id)
+    );
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY, organization_id TEXT, name TEXT NOT NULL, email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL, phone TEXT, photo TEXT, role TEXT DEFAULT 'viewer',
@@ -240,13 +252,10 @@ export function initSchema() {
       id TEXT PRIMARY KEY, student_id TEXT NOT NULL, type TEXT NOT NULL, data TEXT, pdf_url TEXT,
       issued_date TEXT, created_at TEXT DEFAULT (datetime('now'))
     );
-    CREATE TABLE IF NOT EXISTS hostels (
-      id TEXT PRIMARY KEY, school_id TEXT NOT NULL, name TEXT NOT NULL, type TEXT DEFAULT 'Boys',
-      capacity INTEGER DEFAULT 0, occupied INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now'))
-    );
+    /* Housing, fee and payment modules are intentionally not part of this product. */
     CREATE TABLE IF NOT EXISTS media (
       id TEXT PRIMARY KEY, title TEXT, file_url TEXT NOT NULL, file_type TEXT, file_size INTEGER DEFAULT 0,
-      category TEXT, status TEXT DEFAULT 'active', created_at TEXT DEFAULT (datetime('now'))
+      category TEXT, alt_text TEXT, source TEXT, license TEXT, status TEXT DEFAULT 'active', created_at TEXT DEFAULT (datetime('now'))
     );
     CREATE TABLE IF NOT EXISTS pages (
       id TEXT PRIMARY KEY, slug TEXT UNIQUE NOT NULL, title TEXT, sections TEXT,
@@ -258,6 +267,11 @@ export function initSchema() {
       config TEXT DEFAULT '{}', display_order INTEGER DEFAULT 0, is_visible INTEGER DEFAULT 1,
       created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
     );
+    CREATE TABLE IF NOT EXISTS page_blocks (
+      id TEXT PRIMARY KEY, page_id TEXT NOT NULL, block_type TEXT NOT NULL, title TEXT, content TEXT,
+      config TEXT DEFAULT '{}', display_order INTEGER DEFAULT 0, is_visible INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+    );
     CREATE TABLE IF NOT EXISTS site_settings (id TEXT PRIMARY KEY, key TEXT UNIQUE NOT NULL, value TEXT);
     CREATE TABLE IF NOT EXISTS dictionary_categories (
       id TEXT PRIMARY KEY, name TEXT UNIQUE NOT NULL, display_order INTEGER DEFAULT 0
@@ -266,19 +280,49 @@ export function initSchema() {
       id TEXT PRIMARY KEY, category_id TEXT, word TEXT NOT NULL, ol_chiki TEXT, roman TEXT,
       odia TEXT, hindi TEXT, english TEXT, pronunciation TEXT, part_of_speech TEXT, definition TEXT,
       example TEXT, synonyms TEXT, antonyms TEXT, related_words TEXT, audio_url TEXT, source TEXT,
-      verified INTEGER DEFAULT 0, status TEXT DEFAULT 'active',
+      contributor TEXT, verified INTEGER DEFAULT 0, status TEXT DEFAULT 'active',
       created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS dictionary_examples (
+      id TEXT PRIMARY KEY, entry_id TEXT NOT NULL, text TEXT NOT NULL, translation TEXT, display_order INTEGER DEFAULT 0
+    );
+    CREATE TABLE IF NOT EXISTS dictionary_synonyms (
+      id TEXT PRIMARY KEY, entry_id TEXT NOT NULL, word TEXT NOT NULL, display_order INTEGER DEFAULT 0
+    );
+    CREATE TABLE IF NOT EXISTS dictionary_antonyms (
+      id TEXT PRIMARY KEY, entry_id TEXT NOT NULL, word TEXT NOT NULL, display_order INTEGER DEFAULT 0
+    );
+    CREATE TABLE IF NOT EXISTS dictionary_audio (
+      id TEXT PRIMARY KEY, entry_id TEXT NOT NULL, media_id TEXT, audio_url TEXT NOT NULL, speaker TEXT, status TEXT DEFAULT 'active'
     );
     CREATE TABLE IF NOT EXISTS olchiki_letters (
       id TEXT PRIMARY KEY, character TEXT NOT NULL, name TEXT NOT NULL, roman TEXT,
       sound_url TEXT, example_word TEXT, meaning TEXT, image_url TEXT,
       display_order INTEGER DEFAULT 0, status TEXT DEFAULT 'active'
     );
+    CREATE TABLE IF NOT EXISTS olchiki_audio (
+      id TEXT PRIMARY KEY, letter_id TEXT, lesson_id TEXT, media_id TEXT, audio_url TEXT NOT NULL, label TEXT, status TEXT DEFAULT 'active'
+    );
+    CREATE TABLE IF NOT EXISTS olchiki_words (
+      id TEXT PRIMARY KEY, letter_id TEXT, word TEXT NOT NULL, meaning TEXT, image_url TEXT, audio_url TEXT, source TEXT, verified INTEGER DEFAULT 0
+    );
     CREATE TABLE IF NOT EXISTS olchiki_lessons (
       id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT, cover_image TEXT,
       difficulty TEXT DEFAULT 'beginner', age_group TEXT, display_order INTEGER DEFAULT 0,
       status TEXT DEFAULT 'active', letters TEXT, exercises TEXT, quiz TEXT,
       created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS olchiki_exercises (
+      id TEXT PRIMARY KEY, lesson_id TEXT NOT NULL, type TEXT NOT NULL, prompt TEXT NOT NULL, options TEXT, correct_answer TEXT, explanation TEXT, difficulty TEXT, display_order INTEGER DEFAULT 0, status TEXT DEFAULT 'active'
+    );
+    CREATE TABLE IF NOT EXISTS olchiki_quizzes (
+      id TEXT PRIMARY KEY, lesson_id TEXT NOT NULL, title TEXT NOT NULL, status TEXT DEFAULT 'active'
+    );
+    CREATE TABLE IF NOT EXISTS olchiki_questions (
+      id TEXT PRIMARY KEY, quiz_id TEXT NOT NULL, prompt TEXT NOT NULL, options TEXT, correct_answer TEXT NOT NULL, explanation TEXT, display_order INTEGER DEFAULT 0
+    );
+    CREATE TABLE IF NOT EXISTS olchiki_achievements (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT, icon TEXT, criteria TEXT, status TEXT DEFAULT 'active'
     );
     CREATE TABLE IF NOT EXISTS olchiki_progress (
       id TEXT PRIMARY KEY, user_id TEXT NOT NULL, lesson_id TEXT NOT NULL,
@@ -293,10 +337,35 @@ export function initSchema() {
       id TEXT PRIMARY KEY, user_id TEXT, title TEXT NOT NULL, body TEXT, type TEXT DEFAULT 'info',
       is_read INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now'))
     );
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id TEXT PRIMARY KEY, user_id TEXT NOT NULL, token_hash TEXT UNIQUE NOT NULL, expires_at TEXT NOT NULL, used_at TEXT
+    );
     CREATE TABLE IF NOT EXISTS historical_profiles (
       id TEXT PRIMARY KEY, slug TEXT UNIQUE NOT NULL, name TEXT NOT NULL, ol_chiki_name TEXT,
       photo TEXT, summary TEXT, biography TEXT, contributions TEXT, timeline TEXT, sources TEXT,
-      status TEXT DEFAULT 'published', created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+      organization_id TEXT, featured_school_id TEXT, editorial_note TEXT, status TEXT DEFAULT 'draft',
+      created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS historical_profile_sections (
+      id TEXT PRIMARY KEY, profile_id TEXT NOT NULL, section_type TEXT NOT NULL, title TEXT NOT NULL, body TEXT, source_note TEXT, display_order INTEGER DEFAULT 0, status TEXT DEFAULT 'draft'
+    );
+    CREATE TABLE IF NOT EXISTS historical_timeline (
+      id TEXT PRIMARY KEY, profile_id TEXT NOT NULL, date_label TEXT NOT NULL, title TEXT NOT NULL, description TEXT, image_url TEXT, source_note TEXT, display_order INTEGER DEFAULT 0, status TEXT DEFAULT 'draft'
+    );
+    CREATE TABLE IF NOT EXISTS historical_contributions (
+      id TEXT PRIMARY KEY, profile_id TEXT NOT NULL, title TEXT NOT NULL, description TEXT, source_note TEXT, display_order INTEGER DEFAULT 0, status TEXT DEFAULT 'draft'
+    );
+    CREATE TABLE IF NOT EXISTS historical_images (
+      id TEXT PRIMARY KEY, profile_id TEXT NOT NULL, media_id TEXT, image_url TEXT NOT NULL, caption TEXT, image_date TEXT, credit TEXT, copyright_holder TEXT, license TEXT, permission_notes TEXT, alt_text TEXT, display_order INTEGER DEFAULT 0, status TEXT DEFAULT 'draft'
+    );
+    CREATE TABLE IF NOT EXISTS historical_documents (
+      id TEXT PRIMARY KEY, profile_id TEXT NOT NULL, media_id TEXT, title TEXT NOT NULL, document_url TEXT NOT NULL, description TEXT, source_note TEXT, status TEXT DEFAULT 'draft'
+    );
+    CREATE TABLE IF NOT EXISTS historical_sources (
+      id TEXT PRIMARY KEY, profile_id TEXT NOT NULL, title TEXT NOT NULL, author TEXT, publication TEXT, publication_date TEXT, url TEXT, document_url TEXT, notes TEXT, verification_status TEXT DEFAULT 'unverified'
+    );
+    CREATE TABLE IF NOT EXISTS historical_references (
+      id TEXT PRIMARY KEY, profile_id TEXT NOT NULL, title TEXT NOT NULL, author TEXT, url TEXT, notes TEXT, display_order INTEGER DEFAULT 0, status TEXT DEFAULT 'draft'
     );
     CREATE TABLE IF NOT EXISTS culture_content (
       id TEXT PRIMARY KEY, slug TEXT UNIQUE NOT NULL, title TEXT NOT NULL, body TEXT, category TEXT,
@@ -314,6 +383,21 @@ export function initSchema() {
       UNIQUE(academic_year_id, student_id)
     );
   `);
+
+  // Lightweight forward migrations for databases created by earlier releases.
+  const ensureColumn = (table: string, column: string, definition: string) => {
+    try {
+      const columns = db.prepare(`PRAGMA table_info(${table})`).all() as any[];
+      if (!columns.some((item) => item.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    } catch (error) { console.warn(`[db] migration skipped for ${table}.${column}`, error); }
+  };
+  ensureColumn('media', 'alt_text', 'TEXT');
+  ensureColumn('media', 'source', 'TEXT');
+  ensureColumn('media', 'license', 'TEXT');
+  ensureColumn('dictionary_entries', 'contributor', 'TEXT');
+  ensureColumn('historical_profiles', 'organization_id', 'TEXT');
+  ensureColumn('historical_profiles', 'featured_school_id', 'TEXT');
+  ensureColumn('historical_profiles', 'editorial_note', 'TEXT');
 
   // Create indexes
   try {

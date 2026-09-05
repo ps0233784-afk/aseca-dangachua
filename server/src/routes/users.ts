@@ -7,7 +7,10 @@ const router = Router();
 
 router.get('/users', requireAuth, requireRole('super_admin', 'org_admin', 'school_admin'), (req: AuthenticatedRequest, res) => {
   try {
-    const users = db.prepare('SELECT id, name, email, role, school_id, phone, status, last_login_at, created_at FROM users ORDER BY created_at DESC').all();
+    const isOrg = ['super_admin', 'org_admin'].includes(req.user?.role || '');
+    const users = isOrg
+      ? db.prepare('SELECT id, name, email, role, school_id, phone, status, last_login_at, created_at FROM users ORDER BY created_at DESC').all()
+      : db.prepare('SELECT id, name, email, role, school_id, phone, status, last_login_at, created_at FROM users WHERE school_id = ? ORDER BY created_at DESC').all(req.user?.schoolId);
     res.json((users as any[]).map((u) => ({ ...u, schoolId: u.school_id, lastLoginAt: u.last_login_at })));
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch users' });
@@ -18,6 +21,8 @@ router.post('/users', requireAuth, requireRole('super_admin', 'org_admin', 'scho
   try {
     const { name, email, password, role, schoolId, phone } = req.body;
     if (!name || !email || !password) return res.status(400).json({ error: 'Name, email, and password are required' });
+    const requestedRole = role || 'viewer';
+    if (!['super_admin', 'org_admin'].includes(req.user?.role || '') && (!schoolId || schoolId !== req.user?.schoolId || ['super_admin', 'org_admin', 'school_admin'].includes(requestedRole))) return res.status(403).json({ error: 'You can only create non-admin users in your assigned school' });
     if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
 
     const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase().trim());
@@ -38,6 +43,9 @@ router.post('/users', requireAuth, requireRole('super_admin', 'org_admin', 'scho
 router.put('/users/:id', requireAuth, requireRole('super_admin', 'org_admin', 'school_admin'), (req: AuthenticatedRequest, res) => {
   try {
     const { name, role, schoolId, phone, status, password } = req.body;
+    const existing = db.prepare('SELECT school_id FROM users WHERE id = ?').get(req.params.id) as any;
+    if (!existing) return res.status(404).json({ error: 'User not found' });
+    if (!['super_admin', 'org_admin'].includes(req.user?.role || '') && (existing.school_id !== req.user?.schoolId || schoolId !== req.user?.schoolId || ['super_admin', 'org_admin', 'school_admin'].includes(role))) return res.status(403).json({ error: 'You can only update users in your assigned school' });
     if (password && password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
 
     if (password) {

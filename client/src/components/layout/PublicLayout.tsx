@@ -17,7 +17,9 @@ const navigation = [
   { label: 'Home', to: '/' },
   { label: 'About', to: '/about' },
   { label: 'Schools', to: '/schools' },
-  { label: 'Managing Body', to: '/managing-body' },
+  { label: 'Dictionary', to: '/dictionary' },
+  { label: 'Ol Chiki Lab', to: '/olchiki-lab' },
+  { label: 'Our people', to: '/managing-body' },
   { label: 'Contact', to: '/contact' },
 ];
 

@@ -1,10 +1,15 @@
+import { useEffect, useState } from 'react';
 import { ArrowUpRight, CheckCircle2, Scale, ShieldCheck, Users } from 'lucide-react';
+import { api } from '../../lib/api';
 import PublicPageHero from '../../components/public/PublicPageHero';
 import { committee } from '../../lib/publicData';
 
 export default function ManagingBodyPage() {
-  const leadership = committee.slice(0, 3);
-  const members = committee.slice(3);
+  const [people, setPeople] = useState<any[]>(committee.map((person) => ({ ...person, designation: person.role })));
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { api.get<any[]>('/public/managing-body').then((items) => items.length && setPeople(items.map((person) => ({ ...person, initials: person.name.split(' ').map((part: string) => part[0]).join('').slice(0, 2) })))).catch(() => undefined).finally(() => setLoading(false)); }, []);
+  const leadership = people.slice(0, 3);
+  const members = people.slice(3);
 
   return (
     <div className="bg-[#f4f2e9]">
@@ -28,9 +33,9 @@ export default function ManagingBodyPage() {
           <div className="mt-16 grid gap-5 lg:grid-cols-3">
             {leadership.map((person, index) => (
               <article key={`${person.name}-${person.role}`} className={`relative min-h-[430px] overflow-hidden rounded-[2.2rem] p-8 ${index === 0 ? 'bg-lime-300' : index === 1 ? 'bg-amber-300' : 'bg-[#cde0ff]'}`}>
-                <span className="grid h-24 w-24 place-items-center rounded-full bg-[#101a14] public-display text-2xl font-extrabold text-white shadow-xl">{person.initials}</span>
+                {person.photo ? <img src={person.photo} alt={`${person.name} official photograph`} className="h-24 w-24 rounded-full object-cover shadow-xl" /> : <span className="grid h-24 w-24 place-items-center rounded-full bg-[#101a14] public-display text-2xl font-extrabold text-white shadow-xl">{person.initials}</span>}
                 <div className="absolute inset-x-8 bottom-8">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[.2em] opacity-55">{person.role}</p>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[.2em] opacity-55">{person.designation || person.role}</p>
                   <h3 className="public-display mt-3 text-3xl font-extrabold tracking-[-0.04em]">{person.name}</h3>
                   <div className="mt-5 flex items-center gap-2 text-xs font-bold"><CheckCircle2 className="h-4 w-4" />Branch managing body</div>
                 </div>
@@ -53,7 +58,7 @@ export default function ManagingBodyPage() {
                 <div key={`${person.name}-${index}`} className="grid grid-cols-[46px_1fr] items-center gap-4 py-5 sm:grid-cols-[56px_1fr_auto]">
                   <span className="grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/5 text-xs font-extrabold text-lime-300 sm:h-12 sm:w-12">{person.initials}</span>
                   <div><h3 className="font-bold text-white/90">{person.name}</h3><p className="mt-1 text-xs text-white/35">School & community representative</p></div>
-                  <span className="col-start-2 rounded-full border border-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.12em] text-white/50 sm:col-start-auto">{person.role}</span>
+                  <span className="col-start-2 rounded-full border border-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.12em] text-white/50 sm:col-start-auto">{person.designation || person.role}</span>
                 </div>
               ))}
             </div>
