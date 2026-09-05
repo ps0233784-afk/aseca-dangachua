@@ -156,3 +156,174 @@
     display: none !important;
   }
 }
+
+/* Bodhan-inspired public website */
+.public-shell {
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  font-feature-settings: 'ss01' 1, 'ss02' 1;
+}
+
+.public-display {
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+}
+
+.font-olchiki {
+  font-family: 'Noto Sans Ol Chiki', sans-serif;
+}
+
+.public-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
+}
+
+.public-page-hero {
+  background:
+    radial-gradient(circle at 74% 28%, rgba(163, 230, 53, 0.12), transparent 26%),
+    radial-gradient(circle at 6% 100%, rgba(16, 185, 129, 0.13), transparent 32%),
+    #08110c;
+}
+
+.public-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(105px);
+  pointer-events: none;
+}
+
+.public-orb-one {
+  width: 440px;
+  height: 440px;
+  right: -180px;
+  top: 12%;
+  background: rgba(163, 230, 53, 0.13);
+}
+
+.public-orb-two {
+  width: 360px;
+  height: 360px;
+  left: -150px;
+  bottom: -140px;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.public-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.68rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.public-kicker > span {
+  width: 1.75rem;
+  height: 2px;
+  border-radius: 999px;
+  background: #bef264;
+}
+
+.public-kicker-dark {
+  color: rgba(23, 34, 28, 0.55);
+}
+
+.public-kicker-dark > span {
+  background: #047857;
+}
+
+.hero-image-shell::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+  pointer-events: none;
+}
+
+.hero-enter {
+  opacity: 1;
+  animation: heroReveal 0.85s cubic-bezier(.2,.75,.2,1) both;
+}
+
+.hero-enter-one { animation-delay: .05s; }
+.hero-enter-two { animation-delay: .14s; }
+.hero-enter-three { animation-delay: .24s; }
+.hero-enter-four { animation-delay: .34s; }
+
+.hero-float-card {
+  animation: heroFloat 5.5s ease-in-out infinite;
+}
+
+.hero-float-delayed {
+  animation-delay: -2.75s;
+}
+
+.value-track {
+  animation: valueMarquee 28s linear infinite;
+  will-change: transform;
+}
+
+.pillar-card::after {
+  content: '';
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  right: -110px;
+  top: -110px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 26, 20, 0.1);
+  box-shadow: 0 0 0 34px rgba(16, 26, 20, 0.025), 0 0 0 68px rgba(16, 26, 20, 0.02);
+  transition: transform .5s ease;
+}
+
+.pillar-card:hover::after { transform: scale(1.12); }
+.pillar-lime { background: #bef264; }
+.pillar-amber { background: #fcd34d; }
+.pillar-blue { background: #cde0ff; }
+
+.school-detail-card::after {
+  content: '';
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -100px;
+  bottom: -100px;
+  border: 1px solid rgba(16, 26, 20, .1);
+  border-radius: 9999px;
+  box-shadow: 0 0 0 30px rgba(16, 26, 20, .025), 0 0 0 60px rgba(16, 26, 20, .018);
+  transition: transform .45s ease;
+  pointer-events: none;
+}
+
+.school-detail-card:hover::after { transform: scale(1.12); }
+
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0) rotate(-.4deg); }
+  50% { transform: translateY(-10px) rotate(.4deg); }
+}
+
+@keyframes valueMarquee {
+  to { transform: translateX(calc(-50% - 1rem)); }
+}
+
+@media (max-width: 640px) {
+  .public-grid { background-size: 48px 48px; }
+  .home-hero .hero-float-card { transform: scale(.88); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero-enter, .hero-float-card, .value-track { animation: none !important; opacity: 1 !important; transform: none !important; }
+  *, *::before, *::after { transition-duration: .01ms !important; }
+}
