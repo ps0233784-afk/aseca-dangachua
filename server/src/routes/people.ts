@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { db, generateId } from '../db';
-import { AuthenticatedRequest, requireAuth, requireWrite, auditLog } from '../middleware/auth';
+import { AuthenticatedRequest, requireAuth, requireSchoolAccess, requireWrite, auditLog } from '../middleware/auth';
 
 const router = Router();
 
 // Teachers
-router.get('/teachers', requireAuth, (req, res) => {
+router.get('/teachers', requireAuth, requireSchoolAccess, (req, res) => {
   try {
     const { schoolId } = req.query;
     let sql = "SELECT * FROM teachers WHERE status = 'active'";
@@ -22,6 +22,7 @@ router.post('/teachers', requireAuth, requireWrite, (req: AuthenticatedRequest, 
   try {
     const b = req.body;
     if (!b.name || !b.schoolId) return res.status(400).json({ error: 'Name and school are required' });
+    if (!['super_admin', 'org_admin'].includes(req.user?.role || '') && b.schoolId !== req.user?.schoolId) return res.status(403).json({ error: 'You can only manage your assigned school' });
     const id = generateId();
     db.prepare(`INSERT INTO teachers (id, school_id, employee_id, name, photo, dob, gender, qualification, subject_spec, designation, joining_date, phone, email, address, aadhaar, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
@@ -38,6 +39,7 @@ router.post('/teachers', requireAuth, requireWrite, (req: AuthenticatedRequest, 
 router.put('/teachers/:id', requireAuth, requireWrite, (req: AuthenticatedRequest, res) => {
   try {
     const b = req.body;
+    if (!['super_admin', 'org_admin'].includes(req.user?.role || '') && b.schoolId !== req.user?.schoolId) return res.status(403).json({ error: 'You can only manage your assigned school' });
     db.prepare(`UPDATE teachers SET school_id=?, employee_id=?, name=?, photo=?, dob=?, gender=?, qualification=?, subject_spec=?, designation=?, joining_date=?, phone=?, email=?, address=?, aadhaar=?, status=?, updated_at=datetime('now') WHERE id=?`).run(
       b.schoolId, b.employeeId || null, b.name, b.photo || '', b.dob || '', b.gender || '', b.qualification || '', b.subjectSpec || '', b.designation || '', b.joiningDate || '', b.phone || '', b.email || '', b.address || '', b.aadhaar || '', b.status || 'active', req.params.id
     );
@@ -59,7 +61,7 @@ router.delete('/teachers/:id', requireAuth, requireWrite, (req: AuthenticatedReq
 });
 
 // Staff
-router.get('/staff', requireAuth, (req, res) => {
+router.get('/staff', requireAuth, requireSchoolAccess, (req, res) => {
   try {
     const { schoolId } = req.query;
     let sql = "SELECT * FROM staff_members WHERE status = 'active'";
@@ -76,6 +78,7 @@ router.post('/staff', requireAuth, requireWrite, (req: AuthenticatedRequest, res
   try {
     const b = req.body;
     if (!b.name || !b.schoolId) return res.status(400).json({ error: 'Name and school are required' });
+    if (!['super_admin', 'org_admin'].includes(req.user?.role || '') && b.schoolId !== req.user?.schoolId) return res.status(403).json({ error: 'You can only manage your assigned school' });
     const id = generateId();
     db.prepare('INSERT INTO staff_members (id, school_id, name, designation, phone, join_date, duties, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
       id, b.schoolId, b.name, b.designation || '', b.phone || '', b.joinDate || '', b.duties || '', b.status || 'active'
@@ -90,6 +93,7 @@ router.post('/staff', requireAuth, requireWrite, (req: AuthenticatedRequest, res
 router.put('/staff/:id', requireAuth, requireWrite, (req: AuthenticatedRequest, res) => {
   try {
     const b = req.body;
+    if (!['super_admin', 'org_admin'].includes(req.user?.role || '') && b.schoolId !== req.user?.schoolId) return res.status(403).json({ error: 'You can only manage your assigned school' });
     db.prepare(`UPDATE staff_members SET school_id=?, name=?, designation=?, phone=?, join_date=?, duties=?, status=?, updated_at=datetime('now') WHERE id=?`).run(
       b.schoolId, b.name, b.designation || '', b.phone || '', b.joinDate || '', b.duties || '', b.status || 'active', req.params.id
     );

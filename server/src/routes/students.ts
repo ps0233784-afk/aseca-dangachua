@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { db, generateId, maskAadhaar } from '../db';
-import { AuthenticatedRequest, requireAuth, requireWrite, auditLog } from '../middleware/auth';
+import { AuthenticatedRequest, requireAuth, requireSchoolAccess, requireWrite, auditLog } from '../middleware/auth';
 
 const router = Router();
 
 const clean = (v: any) => (v === undefined || v === null ? '' : v);
 const aadhaar12 = (v: any) => (v ? String(v).replace(/\D/g, '').slice(0, 12) : '');
 
-router.get('/students', requireAuth, (req, res) => {
+router.get('/students', requireAuth, requireSchoolAccess, (req, res) => {
   try {
     const { schoolId, q } = req.query;
     let sql = `SELECT s.*, sc.name as school_name, c.name as class_name, sec.name as section_name
@@ -39,10 +39,11 @@ router.get('/students', requireAuth, (req, res) => {
   }
 });
 
-router.get('/students/:id', requireAuth, (req, res) => {
+router.get('/students/:id', requireAuth, (req: AuthenticatedRequest, res) => {
   try {
     const student = db.prepare('SELECT * FROM students WHERE id = ?').get(req.params.id) as any;
     if (!student) return res.status(404).json({ error: 'Student not found' });
+    if (!['super_admin', 'org_admin'].includes(req.user?.role || '') && student.school_id !== req.user?.schoolId) return res.status(403).json({ error: 'You do not have access to this student' });
 
     const isAdmin = ['super_admin', 'org_admin', 'school_admin', 'principal'].includes((req as any).user?.role);
     if (!isAdmin) {
@@ -68,6 +69,7 @@ router.post('/students', requireAuth, requireWrite, (req: AuthenticatedRequest, 
   try {
     const b = req.body;
     if (!b.name || !b.schoolId) return res.status(400).json({ error: 'Name and school are required' });
+    if (!['super_admin', 'org_admin'].includes(req.user?.role || '') && b.schoolId !== req.user?.schoolId) return res.status(403).json({ error: 'You can only manage students in your assigned school' });
     if (b.aadhaar && String(b.aadhaar).replace(/\D/g, '').length !== 12) return res.status(400).json({ error: 'Aadhaar must be exactly 12 digits' });
 
     const id = generateId();
@@ -94,6 +96,7 @@ router.post('/students', requireAuth, requireWrite, (req: AuthenticatedRequest, 
 router.put('/students/:id', requireAuth, requireWrite, (req: AuthenticatedRequest, res) => {
   try {
     const b = req.body;
+    if (!['super_admin', 'org_admin'].includes(req.user?.role || '') && b.schoolId !== req.user?.schoolId) return res.status(403).json({ error: 'You can only manage students in your assigned school' });
     if (b.aadhaar && String(b.aadhaar).replace(/\D/g, '').length !== 12) return res.status(400).json({ error: 'Aadhaar must be exactly 12 digits' });
 
     db.prepare(`UPDATE students SET
@@ -118,6 +121,9 @@ router.put('/students/:id', requireAuth, requireWrite, (req: AuthenticatedReques
 
 router.delete('/students/:id', requireAuth, requireWrite, (req: AuthenticatedRequest, res) => {
   try {
+    const student = db.prepare('SELECT school_id FROM students WHERE id = ?').get(req.params.id) as any;
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+    if (!['super_admin', 'org_admin'].includes(req.user?.role || '') && student.school_id !== req.user?.schoolId) return res.status(403).json({ error: 'You do not have access to this student' });
     db.prepare('DELETE FROM students WHERE id = ?').run(req.params.id);
     auditLog(req.user?.id, req.user?.email, 'DELETE', 'students', `id ${req.params.id}`);
     res.json({ ok: true });

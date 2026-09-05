@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import crypto from 'crypto';
 import { db, generateId } from '../db';
 import { signToken, hashPassword, comparePassword } from '../lib/auth';
 import { AuthenticatedRequest, requireAuth, auditLog } from '../middleware/auth';
@@ -27,6 +28,37 @@ router.post('/auth/login', (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
   }
+});
+
+router.post('/auth/forgot-password', (req, res) => {
+  try {
+    const email = String(req.body?.email || '').toLowerCase().trim();
+    const generic = { message: 'If the account exists, password reset instructions will be sent through the configured provider.' };
+    if (!email) return res.json(generic);
+    const user = db.prepare("SELECT id FROM users WHERE email = ? AND status = 'active'").get(email) as any;
+    if (!user) return res.json(generic);
+    const raw = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(raw).digest('hex');
+    db.prepare("DELETE FROM password_reset_tokens WHERE user_id = ? OR expires_at < datetime('now')").run(user.id);
+    db.prepare("INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at) VALUES (?, ?, ?, datetime('now', '+30 minutes'))").run(generateId(), user.id, tokenHash);
+    // In production an email/SMS provider should consume this token. It is returned only for local demo setup.
+    if (process.env.NODE_ENV !== 'production') return res.json({ ...generic, demoResetToken: raw });
+    return res.json(generic);
+  } catch { return res.json({ message: 'If the account exists, password reset instructions will be sent through the configured provider.' }); }
+});
+
+router.post('/auth/reset-password', (req, res) => {
+  try {
+    const token = String(req.body?.token || ''); const password = String(req.body?.password || '');
+    if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const record = db.prepare("SELECT * FROM password_reset_tokens WHERE token_hash = ? AND used_at IS NULL AND expires_at > datetime('now')").get(tokenHash) as any;
+    if (!record) return res.status(400).json({ error: 'Reset token is invalid or expired' });
+    db.prepare('UPDATE users SET password_hash = ?, updated_at = datetime(\'now\') WHERE id = ?').run(hashPassword(password), record.user_id);
+    db.prepare("UPDATE password_reset_tokens SET used_at = datetime('now') WHERE id = ?").run(record.id);
+    auditLog(record.user_id, 'password-reset', 'RESET_PASSWORD', 'auth');
+    return res.json({ message: 'Password reset successfully' });
+  } catch { return res.status(500).json({ error: 'Could not reset password' }); }
 });
 
 router.get('/auth/me', requireAuth, (req: AuthenticatedRequest, res) => {

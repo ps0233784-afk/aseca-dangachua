@@ -42,6 +42,11 @@ export function requireWrite(req: AuthenticatedRequest, res: Response, next: Nex
 export function requireSchoolAccess(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   if (!req.user) return res.status(401).json({ error: 'Authentication required' });
   if (['super_admin', 'org_admin'].includes(req.user.role)) return next();
+  if (!req.user.schoolId) return res.status(403).json({ error: 'A school assignment is required' });
+  const requested = typeof req.query.schoolId === 'string' ? req.query.schoolId : undefined;
+  if (requested && requested !== req.user.schoolId) return res.status(403).json({ error: 'You do not have access to this school' });
+  // Downstream list routes read this normalized scope, so a school user cannot widen a query by omission.
+  req.query.schoolId = req.user.schoolId;
   next();
 }
 

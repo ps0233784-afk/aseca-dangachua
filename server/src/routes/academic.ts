@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { db, generateId } from '../db';
-import { AuthenticatedRequest, requireAuth, requireWrite, auditLog } from '../middleware/auth';
+import { AuthenticatedRequest, requireAuth, requireSchoolAccess, requireWrite, auditLog } from '../middleware/auth';
 
 const router = Router();
 
 // Academic Years
-router.get('/academic-years', requireAuth, (req, res) => {
+router.get('/academic-years', requireAuth, requireSchoolAccess, (req, res) => {
   try {
     const { schoolId } = req.query;
     let sql = 'SELECT * FROM academic_years';
@@ -34,7 +34,7 @@ router.post('/academic-years', requireAuth, requireWrite, (req: AuthenticatedReq
 });
 
 // Classes
-router.get('/classes', requireAuth, (req, res) => {
+router.get('/classes', requireAuth, requireSchoolAccess, (req, res) => {
   try {
     const { schoolId } = req.query;
     let sql = 'SELECT * FROM classes';

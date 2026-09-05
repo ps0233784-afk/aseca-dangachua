@@ -1,128 +1,46 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../lib/auth';
 import {
-  LayoutDashboard, School, Users, UserCheck, UserCog, Settings, LogOut,
-  Menu, X, GraduationCap, ChevronDown, Bell,
+  Activity, Archive, BarChart3, Bell, BookOpen, Building2, CalendarDays, ClipboardCheck, Database,
+  FileBadge, FileText, GraduationCap, LayoutDashboard, Library, LogOut, Menu, PanelLeftClose, PanelLeftOpen,
+  Search, Settings, ShieldCheck, Sparkles, Users, UserCheck, UserCog, X, Languages, Image, Newspaper, ScrollText,
 } from 'lucide-react';
+
+const groups = [
+  { label: 'Overview', items: [{ path: '/app', icon: LayoutDashboard, label: 'Dashboard' }, { path: '/app/workspace/notifications', icon: Bell, label: 'Notifications' }] },
+  { label: 'Organization', items: [{ path: '/app/schools', icon: Building2, label: 'Schools', admin: true }, { path: '/app/students', icon: Users, label: 'Students' }, { path: '/app/teachers', icon: UserCheck, label: 'Teachers' }, { path: '/app/staff', icon: UserCog, label: 'Staff' }, { path: '/app/users', icon: ShieldCheck, label: 'Users', admin: true }] },
+  { label: 'Academic operations', items: [{ path: '/app/workspace/academic-years', icon: CalendarDays, label: 'Academic Years' }, { path: '/app/workspace/classes', icon: GraduationCap, label: 'Classes & Sections' }, { path: '/app/workspace/subjects', icon: BookOpen, label: 'Subjects' }, { path: '/app/workspace/attendance', icon: ClipboardCheck, label: 'Attendance' }, { path: '/app/workspace/examinations', icon: FileText, label: 'Examinations & Marks' }, { path: '/app/workspace/timetable', icon: CalendarDays, label: 'Timetable' }] },
+  { label: 'Resources & records', items: [{ path: '/app/workspace/library', icon: Library, label: 'Library' }, { path: '/app/workspace/documents', icon: FileText, label: 'Documents' }, { path: '/app/workspace/certificates', icon: FileBadge, label: 'Certificates & ID Cards' }] },
+  { label: 'Public content', items: [{ path: '/app/workspace/notices', icon: Newspaper, label: 'Notices & Events' }, { path: '/app/workspace/gallery', icon: Image, label: 'Gallery & Achievements' }, { path: '/app/workspace/managing-body', icon: Users, label: 'Managing Body' }, { path: '/app/workspace/heritage', icon: ScrollText, label: 'Pandit Raghunath Murmu' }, { path: '/app/workspace/culture', icon: Languages, label: 'Santali Culture' }, { path: '/app/workspace/resources', icon: Archive, label: 'Educational Resources' }, { path: '/app/dictionary', icon: Languages, label: 'Santali Dictionary' }, { path: '/app/workspace/olchiki-lab', icon: Sparkles, label: 'Ol Chiki Lab' }, { path: '/app/media', icon: Image, label: 'Media Library' }, { path: '/app/page-builder', icon: PanelLeftOpen, label: 'Pages & Page Builder' }] },
+  { label: 'Governance', items: [{ path: '/app/workspace/reports', icon: BarChart3, label: 'Reports & Export' }, { path: '/app/workspace/audit-logs', icon: Activity, label: 'Audit Logs' }, { path: '/app/workspace/settings', icon: Settings, label: 'Settings' }] },
+];
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
   const { user, logout, canAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const visibleGroups = useMemo(() => groups.map((group) => ({ ...group, items: group.items.filter((item) => !item.admin || canAdmin) })).filter((group) => group.items.length), [canAdmin]);
+  const handleLogout = () => { logout(); navigate('/login'); };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  useEffect(() => { const onKey = (event: KeyboardEvent) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); setCommandOpen(true); } if (event.key === 'Escape') setCommandOpen(false); }; window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey); }, []);
 
-  const menuItems = [
-    { path: '/app', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/app/schools', icon: School, label: 'Schools', admin: true },
-    { path: '/app/students', icon: Users, label: 'Students' },
-    { path: '/app/teachers', icon: UserCheck, label: 'Teachers' },
-    { path: '/app/staff', icon: UserCog, label: 'Staff' },
-    { path: '/app/users', icon: Settings, label: 'Users', admin: true },
-  ];
-
-  const filteredMenu = menuItems.filter((item) => !item.admin || canAdmin);
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 lg:translate-x-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="flex items-center gap-3 px-6 h-16 border-b border-gray-100">
-            <div className="w-9 h-9 rounded-lg gradient-brand flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <div className="font-display font-bold text-gray-900 text-sm">ASECA ERP</div>
-              <div className="text-xs text-gray-500">Dangachua</div>
-            </div>
-            <button onClick={() => setSidebarOpen(false)} className="ml-auto lg:hidden p-1 hover:bg-gray-100 rounded">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-            {filteredMenu.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={isActive ? 'sidebar-link-active' : 'sidebar-link'}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* User Section */}
-          <div className="border-t border-gray-100 p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center">
-                <span className="text-sm font-semibold text-brand-700">
-                  {user?.name?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-gray-900 truncate">{user?.name}</div>
-                <div className="text-xs text-gray-500 truncate">{user?.email}</div>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-64">
-        {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white border-b border-gray-200 h-16 flex items-center px-4 sm:px-6">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 mr-4"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-
-          <div className="flex-1" />
-
-          <button className="p-2 rounded-lg hover:bg-gray-100 relative">
-            <Bell className="w-5 h-5 text-gray-600" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-          </button>
-        </header>
-
-        {/* Page Content */}
-        <main className="p-4 sm:p-6 lg:p-8">
-          <Outlet />
-        </main>
-      </div>
+  return <div className="app-shell min-h-screen bg-[#f6f7f4] text-[#18221c]">
+    <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[#dce5de] bg-[#fbfcfa] transition-all duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${collapsed ? 'w-[88px]' : 'w-[280px]'}`}>
+      <div className={`flex h-[78px] items-center border-b border-[#e5ebe6] ${collapsed ? 'justify-center px-3' : 'gap-3 px-5'}`}><Link to="/app" className="flex min-w-0 items-center gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#c9f36a] font-olchiki text-2xl font-bold text-[#102016]">ᱚ</span>{!collapsed && <span className="min-w-0"><strong className="block truncate text-sm font-extrabold tracking-[-.02em]">ASECA DANGACHUA</strong><span className="mt-0.5 block text-[10px] font-bold uppercase tracking-[.17em] text-[#708079]">ERP workspace</span></span>}</Link><button onClick={() => setSidebarOpen(false)} className="ml-auto rounded-lg p-2 text-[#708079] hover:bg-[#edf2ed] lg:hidden" aria-label="Close navigation"><X className="h-5 w-5" /></button></div>
+      {!collapsed && <div className="px-4 pt-4"><button onClick={() => setCommandOpen(true)} className="flex w-full items-center gap-3 rounded-xl border border-[#e2e9e3] bg-white px-3 py-2.5 text-left text-xs text-[#7b8980] shadow-sm"><Search className="h-4 w-4" />Search the workspace<span className="ml-auto rounded-md border border-[#e2e9e3] px-1.5 py-0.5 text-[10px] font-bold">⌘K</span></button></div>}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">{visibleGroups.map((group) => <div key={group.label} className="mb-5"><p className={`mb-2 px-3 text-[9px] font-extrabold uppercase tracking-[.2em] text-[#98a59c] ${collapsed ? 'text-center' : ''}`}>{collapsed ? '•' : group.label}</p>{group.items.map((item) => { const active = item.path === '/app' ? location.pathname === '/app' : location.pathname.startsWith(item.path); return <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)} title={collapsed ? item.label : undefined} className={`group mb-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition ${active ? 'bg-[#173121] text-[#c9f36a] shadow-lg shadow-emerald-950/10' : 'text-[#647269] hover:bg-[#edf2ed] hover:text-[#18221c]'} ${collapsed ? 'justify-center' : ''}`}><item.icon className={`h-[17px] w-[17px] shrink-0 ${active ? 'text-[#c9f36a]' : 'text-[#93a098] group-hover:text-[#516056]'}`} />{!collapsed && <span className="truncate">{item.label}</span>}</Link>; })}</div>)}</nav>
+      <div className={`border-t border-[#e5ebe6] p-3 ${collapsed ? 'flex justify-center' : ''}`}>{collapsed ? <button onClick={() => setCollapsed(false)} className="rounded-xl p-3 text-[#708079] hover:bg-[#edf2ed]" title="Expand sidebar"><PanelLeftOpen className="h-5 w-5" /></button> : <div className="flex items-center gap-3 rounded-xl bg-[#f0f4ef] p-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#173121] text-sm font-extrabold text-[#c9f36a]">{user?.name?.charAt(0) || 'U'}</span><div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold">{user?.name}</p><p className="truncate text-[10px] text-[#7b8980]">{user?.role?.replace(/_/g, ' ')}</p></div><button onClick={handleLogout} className="rounded-lg p-2 text-[#93a098] hover:bg-white hover:text-red-600" title="Sign out"><LogOut className="h-4 w-4" /></button></div>}</div>
+    </aside>
+    {sidebarOpen && <button aria-label="Close navigation overlay" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-40 bg-[#08110c]/45 lg:hidden" />}
+    <div className={`min-h-screen transition-[margin] duration-300 ${collapsed ? 'lg:ml-[88px]' : 'lg:ml-[280px]'}`}>
+      <header className="sticky top-0 z-30 flex h-[78px] items-center gap-4 border-b border-[#e5ebe6] bg-[#fbfcfa]/90 px-4 backdrop-blur-xl sm:px-7"><button onClick={() => setSidebarOpen(true)} className="rounded-xl p-2 text-[#5d6d63] hover:bg-[#edf2ed] lg:hidden" aria-label="Open navigation"><Menu className="h-5 w-5" /></button><button onClick={() => setCollapsed((value) => !value)} className="hidden rounded-xl p-2 text-[#7b8980] hover:bg-[#edf2ed] lg:block" title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>{collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}</button><div className="hidden min-w-0 sm:block"><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#94a198]">Branch operations</p><p className="truncate text-sm font-extrabold">{location.pathname === '/app' ? 'Good morning, ' : ''}{user?.name?.split(' ')[0]}</p></div><div className="flex-1" /><button onClick={() => setCommandOpen(true)} className="hidden items-center gap-2 rounded-xl border border-[#e2e9e3] bg-white px-3 py-2 text-xs text-[#7b8980] shadow-sm md:flex"><Search className="h-4 w-4" />Search anything<span className="rounded-md border border-[#e2e9e3] px-1.5 py-0.5 text-[10px] font-bold">Ctrl K</span></button><button className="relative rounded-xl p-2.5 text-[#647269] hover:bg-[#edf2ed]" title="Notifications"><Bell className="h-5 w-5" /><span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-amber-500" /></button><Link to="/" target="_blank" className="hidden rounded-xl bg-[#c9f36a] px-4 py-2.5 text-xs font-extrabold text-[#102016] transition hover:bg-[#b6e950] sm:block">View website</Link></header>
+      <main className="p-4 sm:p-6 lg:p-8"><Outlet /></main>
     </div>
-  );
+    {commandOpen && <CommandPalette onClose={() => setCommandOpen(false)} onNavigate={(path) => { setCommandOpen(false); navigate(path); }} />}
+  </div>;
 }
+function CommandPalette({ onClose, onNavigate }: { onClose: () => void; onNavigate: (path: string) => void }) { const [q, setQ] = useState(''); const items = groups.flatMap((group) => group.items).filter((item, index, all) => all.findIndex((other) => other.path === item.path) === index); const filtered = items.filter((item) => item.label.toLowerCase().includes(q.toLowerCase())); return <div className="fixed inset-0 z-[70] grid place-items-start bg-[#08110c]/45 px-4 pt-[12vh]" onClick={onClose}><div className="w-full max-w-xl overflow-hidden rounded-2xl border border-[#dce5de] bg-[#fbfcfa] shadow-2xl" onClick={(event) => event.stopPropagation()}><div className="flex items-center gap-3 border-b border-[#e5ebe6] px-4"><Search className="h-5 w-5 text-[#839188]" /><input autoFocus value={q} onChange={(event) => setQ(event.target.value)} placeholder="Jump to a module…" className="w-full bg-transparent py-4 text-sm outline-none" /><kbd className="rounded bg-[#edf2ed] px-2 py-1 text-[10px]">ESC</kbd></div><div className="max-h-[55vh] overflow-y-auto p-2">{filtered.length ? filtered.map((item) => <button key={item.path} onClick={() => onNavigate(item.path)} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-bold text-[#516056] hover:bg-[#edf2ed]"><item.icon className="h-4 w-4 text-[#71905a]" />{item.label}<span className="ml-auto text-[10px] text-[#9aa69d]">Open</span></button>) : <p className="p-6 text-center text-sm text-[#7b8980]">No matching workspace module.</p>}</div></div></div>; }
