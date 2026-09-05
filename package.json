@@ -1,14 +1,16 @@
 {
   "name": "aseca-dangachua",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "BRANCH ASECA DANGACHUA — Multi-School ERP + CMS + Public Website",
+  "description": "BRANCH ASECA DANGACHUA — Multi-School ERP + Cultural Platform + Santali Dictionary + Ol Chiki Lab",
   "scripts": {
     "install:all": "npm install --prefix server && npm install --prefix client",
     "build": "npm run build --prefix server && npm run build --prefix client",
     "dev:server": "npm run dev --prefix server",
     "dev:client": "npm run dev --prefix client",
-    "start": "npm run start --prefix server"
+    "start": "npm run start --prefix server",
+    "db:push": "npm run db:push --prefix server",
+    "db:seed": "npm run db:seed --prefix server"
   },
   "engines": {
     "node": "22.x"

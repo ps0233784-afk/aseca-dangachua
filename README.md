@@ -1,122 +1,57 @@
-# BRANCH ASECA DANGACHUA — Multi-School ERP + CMS + Public Website
+# BRANCH ASECA DANGACHUA
 
-**ADIVASI SOCIO-EDUCATIONAL & CULTURAL ASSOCIATION, ODISHA (ASECA)**
-ᱚ.ᱟ.ᱮ.ᱥ.ᱮ.ᱠ.ᱮ ᱩᱰᱤᱥᱟ ᱥᱟᱠᱷᱟ ᱫᱟᱸᱜᱩᱣᱟᱹ ᱠᱮᱱᱫᱩᱡᱷᱟᱹᱨ, ᱩᱰᱤᱥᱟ
-*Education • Culture • Community*
+**Multi-School ERP + Cultural Platform + Santali Dictionary + Ol Chiki Lab**
 
-- **H.O.:** Regd No-2667/269 of 1964, Rairangpur
-- **B.O.:** Regd No-77/26 of 2026, At-Dangachua, P.O.-Bidyadharpur, P.S.-Soso, Dist-Kendujhar, PIN-758078, Odisha
+- **Domain:** branchasecadangachua.org
+- **Stack:** React 18 + TypeScript + Tailwind CSS | Node.js + Express + TypeScript | Prisma + SQLite/PostgreSQL
 
-A complete, database-driven ERP for the Ol-Itun Ashra (Santali-medium school) network:
-multi-school management, students with Aadhaar identity verification, 11-member SMC
-management, Matric & +2 mark sheets with MIL Santali Papers I–IV, printable affiliation
-forms, certificates, ID cards, attendance, hostel, library, notices, events, a visual
-CMS page builder, Excel import/export, and a public marketing website — with **no
-payment/fee functionality anywhere** (by design).
-
-## Tech stack
-
-| Layer | Technology |
-|---|---|
-| Frontend | React 18 + TypeScript, Vite, Tailwind CSS, Lucide icons, Recharts |
-| Backend | Node.js + Express + TypeScript |
-| Database | SQLite (zero-config, auto-seeding) — PostgreSQL DDL provided (`server/postgres-schema.sql`) |
-| Auth | JWT sessions, bcrypt password hashing, role-based access (6 roles) |
-| Storage | Local secure object store (`/uploads`) — swap for Supabase Storage / S3 |
-| Documents | Browser print engine → PDF (affiliation form, mark sheet, certificates, ID cards) |
-| Excel | SheetJS (xlsx) bulk import & export |
-
-## Quick start (local)
+## Quick Start
 
 ```bash
-npm run install:all      # install server + client deps
-npm run build            # build both (or run dev servers below)
-npm start                # serves API + built site on http://localhost:4000
+npm run install:all    # Install dependencies
+npm run db:push        # Push schema to database
+npm run db:seed        # Seed demo data
+npm run build          # Build both server and client
+npm start              # Start on http://localhost:4000
 ```
 
-Dev mode (hot reload):
+## Dev Mode
 
 ```bash
-npm run dev:server       # Express on :4000 (tsx watch)
-npm run dev:client       # Vite on :5173 (proxies /api → :4000)
+npm run dev:server     # Express on :4000 (hot reload)
+npm run dev:client     # Vite on :5173 (proxies /api → :4000)
 ```
 
-### Demo accounts
+## Demo Accounts
 
 | Role | Email | Password |
 |---|---|---|
-| Central Administrator | `admin@aseca.org` | `admin@123` |
-| Branch Administrator | `branch@aseca.org` | `branch@123` |
-| Headmaster (Principal) | `bhagaban@aseca.org` | `school@123` |
+| Super Admin | `superadmin@aseca.org` | `admin@123` |
+| Org Admin | `orgadmin@aseca.org` | `admin@123` |
+| School Admin | `schooladmin@aseca.org` | `admin@123` |
+| Principal | `principal@aseca.org` | `school@123` |
 | Teacher | `teacher@aseca.org` | `school@123` |
 
-The database seeds itself on first boot: 3 affiliated Ol-Itun Ashras (Hans Hansli
-Dangachua, Sida Kanhu Haradabadi, Marang Buru Binapatia), full 11-member SMC for each,
-23 students (incl. the Matric examinees Urmila Hembram, Benudhar Murmu, Suru Beshra,
-Anant Kisku and 12 +2 examinees), SUMMER-2026-27 exams at Ragudia centre (code 026),
-hostels, library books, notices, events and the public home page.
+## Features
 
-## Modules
+- ✅ Multi-school management with data isolation
+- ✅ Student CRUD with Aadhaar masking
+- ✅ Teacher & staff management
+- ✅ Role-based access control (RBAC)
+- ✅ Premium public website with cultural design
+- ✅ Responsive mobile-first UI
+- ✅ Audit logging
+- ✅ Dashboard with stats
 
-- **Dashboard** — branch KPIs, attendance trend, gender split, school-wise charts, latest notices
-- **Schools & SMC** — affiliation data, 11-member statutory committee editor with signature tracking
-- **Students** — admission, Odia/Santali (Ol Chiki) names, Aadhaar validation + masked display,
-  9-tab profile (Overview, Identity & Verification, Academic, Attendance, Examinations,
-  Documents, Library, Timetable, Certificates)
-- **Teachers & Staff** — designations, qualifications, subject specialisations, support staff
-- **Attendance** — daily student & teacher registers, term summary, audit-logged
-- **Exams & Mark Sheets** — Matric/+2 grid: MIL-I–IV (Santali), Odia, English; auto totals,
-  grades (A+…F), PASS/FAIL (30/paper, 33% aggregate); roll formats `36SSMS026001`, `36SS+2S026001`
-- **Subjects** — dynamic, editable Ol-Itun Ashra subject catalogue (global + per-school)
-- **Timetable** — weekly period grid per class
-- **Hostel** — boys/girls hostels, wardens, capacity, room/bed allocation
-- **Library** — catalogue, copies, PDF book upload, 30-day issue/return register
-- **Notices / Events / Media** — branch-wide or per-school, public-site integration
-- **Page Builder** — block-based visual CMS for the public landing page
-- **Certificates & ID Cards** — bonafide, conduct, transfer certificates; front/back ID cards
-- **Excel Center** — export/import .xlsx for students, teachers, staff, SMC, books, notices, exams
-- **Users & Roles / Audit Logs** — multi-role authorization and full activity trail
-- **Public website** — home, about, schools, notices, events, contact (Ol Chiki typography,
-  tribal motifs, glassmorphism, brand palette)
+## Strictly Excluded
 
-### Explicitly excluded
-No fees, payments, transactions, receipts, gateways, revenue dashboards or financial reports —
-anywhere in the schema, API, UI or menus.
+- No fee/payment modules
+- No hostel modules
+- No payment gateways
 
-## Deploy to Render
+## Environment
 
-The included `render.yaml` blueprint defines a single Web Service:
-
-1. Push this repo to GitHub/GitLab.
-2. Render → **New → Blueprint** → select the repo → apply `render.yaml`.
-   (Or create a Web Service manually: build `npm run install:all && npm run build`,
-   start `node server/dist/index.js`, health check `/api/health`.)
-3. Set env vars: `JWT_SECRET` (auto-generated by blueprint), `NODE_ENV=production`,
-   `SEED_ON_BOOT=true`. Render injects `PORT`.
-4. The service serves both the REST API and the built React app from one origin.
-
-**Persistence:** the free plan has an ephemeral disk — the database auto-reseeds on every
-deploy (fine for demos). For persistent data, attach a Render Disk mounted at `/var/data`
-(uncomment the `disk:` block in `render.yaml`), or provision Render Postgres and use
-`server/postgres-schema.sql`. Uploads (`/uploads`) likewise persist only with a disk;
-for production use Supabase Storage / S3 (the upload route is isolated in
-`server/src/routes/ops.ts` for easy swapping).
-
-## Project layout
-
-```
-aseca/
-├── render.yaml              # Render blueprint
-├── server/
-│   ├── src/
-│   │   ├── index.ts         # Express app, static hosting
-│   │   ├── db.ts            # SQLite schema + idempotent seed
-│   │   ├── auth.ts          # JWT, role middleware, audit
-│   │   └── routes/          # core, people, academic, ops APIs
-│   └── postgres-schema.sql  # PostgreSQL + RLS reference DDL
-└── client/
-    └── src/
-        ├── App.tsx          # routes (public / app / print)
-        ├── pages/           # public site + ERP modules + printables
-        └── components/      # UI kit
-```
+Copy `.env.example` to `.env` and configure:
+- `DATABASE_URL` — Prisma database URL
+- `JWT_SECRET` — Secret for JWT tokens
+- `PORT` — Server port (default: 4000)
